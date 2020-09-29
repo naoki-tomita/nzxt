@@ -7,7 +7,16 @@ declare module "parcel" {
       target?: "node" | "browser" = "browser";
       sourceMaps?: boolean = true;
     } = {})
-    async bundle(): Promise<void>;
+    async bundle(): Promise<Bundle>;
+  }
+
+  class Bundle {
+    name: string;
+    type: string;
+    parentBundle: Bundle;
+    totalSize: number;
+    bundleTime: number;
+    isolated?: boolean;
   }
   export default Bundler;
 }

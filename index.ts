@@ -14,21 +14,28 @@ async function getFiles(rootPath: string): Promise<string[]> {
   return [...files, ...(await Promise.all(dirs.map(it => getFiles(it)))).flat()];
 }
 
-async function generateTmpFile(file: string, params: { [key: string]: string }): Promise<string> {
+async function generateCode(file: string): Promise<(parameter: { [key: string]: string }) => string> {
   const hash = file.replace(/\//g, "_");
   const tmpFilePath = `./.tmp/main.${hash}.tsx`;
   await writeFile(tmpFilePath, `
+    declare const parameter;
     import { render, h } from "zheleznaya";
     import Component from "../${file}";
-    render(<Component {...${JSON.stringify(params)}} />);
+    (function (params: any) {
+      render(<Component {...params} />);
+    })(parameter);
   `);
-  const bundler = new Bundler([tmpFilePath], { watch: false, sourceMaps: false });
+  const bundler = new Bundler([tmpFilePath], {
+    watch: false,
+    sourceMaps: false,
+    production: true,
+  });
   const result = await bundler.bundle();
-  console.log(result);
-  return `dist/main.${hash}.js`
+  const code = await readFile(result.name);
+  return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
 }
 
-async function generateHtml(jsPath: string): Promise<string> {
+function generateHtml(code: string): string {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -39,7 +46,7 @@ async function generateHtml(jsPath: string): Promise<string> {
 </head>
 <body>
   <script>
-    ${(await readFile(jsPath)).toString()}
+    ${code}
   </script>
 </body>
 </html>
@@ -52,22 +59,25 @@ async function main() {
   const files = await getFiles(root)
   const app = express();
 
-  files.forEach(file => {
-    const path = file
-      .replace(/_(.+)_/g, ":$1")
-      .replace(root, "")
-      .replace(/\/(.*)\.tsx$/g, "/$1")
-      .replace(/\/index$/g, "");
-    app.get(path, async (req, res) => {
-      try {
-        const code = await generateTmpFile(file, req.params).then(generateHtml);
-        res.status(200).end(code);
-      } catch (e) {
-        console.error(e);
-        res.status(500).end("error");
-      }
-    });
-  });
+  await Promise.all(
+    files.map(async file => {
+      const path = file
+        .replace(/_(.+)_/g, ":$1")
+        .replace(root, "")
+        .replace(/\/(.*)\.tsx$/g, "/$1")
+        .replace(/\/index$/g, "");
+      const codeGenerator = await generateCode(file);
+      app.get(path, async (req, res) => {
+        try {
+          const html = generateHtml(codeGenerator(req.params));
+          res.status(200).end(html);
+        } catch (e) {
+          console.error(e);
+          res.status(500).end("error");
+        }
+      });
+    })
+  );
 
   await app.listen(8080);
 }

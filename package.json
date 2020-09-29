@@ -1,6 +1,6 @@
 {
   "name": "nzxt",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": "bin/nzxt.js",

@@ -72,7 +72,10 @@ async function main() {
       app.get(path, async (req, res) => {
         try {
           const { default: Component } = await import(`./${file}`);
-          const html = generateHtml(codeGenerator(req.params).trim(), renderToText(<Component {...req.params} />).trim());
+          const html = generateHtml(
+            codeGenerator(req.params).trim(),
+            renderToText(<Component {...req.params} />).trim()
+          );
           res.status(200).end(html);
         } catch (e) {
           console.error(e);

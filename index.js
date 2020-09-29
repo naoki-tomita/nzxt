@@ -1,28 +1,8 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.h = void 0;
 const promises_1 = require("fs/promises");
 const Express_1 = require("summer-framework/dist/Express");
 const parcel_1 = __importDefault(require("parcel"));
@@ -90,7 +70,7 @@ async function main() {
         const codeGenerator = await generateCode(file);
         app.get(path, async (req, res) => {
             try {
-                const { default: Component } = await Promise.resolve().then(() => __importStar(require(`./${file}`)));
+                const { default: Component } = require(path_1.join(process.cwd(), `${file}`));
                 const html = generateHtml(codeGenerator(req.params).trim(), zheleznaya_1.renderToText(zheleznaya_1.h(Component, Object.assign({}, req.params))).trim());
                 res.status(200).end(html);
             }
@@ -103,6 +83,4 @@ async function main() {
     await app.listen(8080);
 }
 main();
-var zheleznaya_2 = require("zheleznaya");
-Object.defineProperty(exports, "h", { enumerable: true, get: function () { return zheleznaya_2.h; } });
 //# sourceMappingURL=index.js.map

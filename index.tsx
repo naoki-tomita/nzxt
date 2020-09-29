@@ -71,7 +71,7 @@ async function main() {
       const codeGenerator = await generateCode(file);
       app.get(path, async (req, res) => {
         try {
-          const { default: Component } = await import(`./${file}`);
+          const { default: Component } = require(join(process.cwd(), `${file}`));
           const html = generateHtml(
             codeGenerator(req.params).trim(),
             renderToText(<Component {...req.params} />).trim()
@@ -89,6 +89,3 @@ async function main() {
 }
 
 main();
-
-export { h } from "zheleznaya";
-export type { Component } from "zheleznaya";

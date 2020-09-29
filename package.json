@@ -11,9 +11,9 @@
     "summer-framework": "^0.2.4",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3",
-    "zheleznaya": "^0.0.9"
+    "zheleznaya": "^0.1.2"
   },
   "scripts": {
-    "start": "ts-node --files index.ts"
+    "start": "ts-node --files index.tsx"
   }
 }

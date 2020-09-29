@@ -2,6 +2,7 @@ import { readdir, readFile, stat, writeFile, mkdir } from "fs/promises";
 import { express } from "summer-framework/dist/Express";
 import Bundler from "parcel";
 import { join } from "path";
+import { renderToText, h } from "zheleznaya";
 
 async function getFiles(rootPath: string): Promise<string[]> {
   const names = await readdir(rootPath);
@@ -22,7 +23,7 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
     import { render, h } from "zheleznaya";
     import Component from "../${file}";
     (function (params: any) {
-      render(<Component {...params} />);
+      render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
   const bundler = new Bundler([tmpFilePath], {
@@ -35,7 +36,7 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
   return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
 }
 
-function generateHtml(code: string): string {
+function generateHtml(code: string, renderedHtml: string): string {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -45,6 +46,7 @@ function generateHtml(code: string): string {
   <title>Document</title>
 </head>
 <body>
+  <div id="nzxt-app">${renderedHtml}</div>
   <script>
     ${code}
   </script>
@@ -69,7 +71,8 @@ async function main() {
       const codeGenerator = await generateCode(file);
       app.get(path, async (req, res) => {
         try {
-          const html = generateHtml(codeGenerator(req.params));
+          const { default: Component } = await import(`./${file}`);
+          const html = generateHtml(codeGenerator(req.params).trim(), renderToText(<Component {...req.params} />).trim());
           res.status(200).end(html);
         } catch (e) {
           console.error(e);

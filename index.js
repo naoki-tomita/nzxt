@@ -22,6 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.h = void 0;
 const promises_1 = require("fs/promises");
 const Express_1 = require("summer-framework/dist/Express");
 const parcel_1 = __importDefault(require("parcel"));
@@ -102,4 +103,6 @@ async function main() {
     await app.listen(8080);
 }
 main();
+var zheleznaya_2 = require("zheleznaya");
+Object.defineProperty(exports, "h", { enumerable: true, get: function () { return zheleznaya_2.h; } });
 //# sourceMappingURL=index.js.map

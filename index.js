@@ -8,6 +8,17 @@ const Express_1 = require("summer-framework/dist/Express");
 const parcel_1 = __importDefault(require("parcel"));
 const path_1 = require("path");
 const zheleznaya_1 = require("zheleznaya");
+function getOption(optionName) {
+    const index = process.argv.indexOf(optionName);
+    if (index === -1) {
+        return false;
+    }
+    const val = process.argv[index + 1];
+    if (val == null || val.startsWith("-")) {
+        return true;
+    }
+    return val;
+}
 async function getFiles(rootPath) {
     const names = await promises_1.readdir(rootPath);
     const list = await Promise.all(names.map(async (it) => ({
@@ -19,12 +30,12 @@ async function getFiles(rootPath) {
     return [...files, ...(await Promise.all(dirs.map(it => getFiles(it)))).flat()];
 }
 async function generateCode(file) {
-    const hash = file.replace(/\//g, "_");
-    const tmpFilePath = `./.tmp/main.${hash}.tsx`;
+    const hash = file.replace(/\//g, "_").replace(/\./g, "_");
+    const tmpFilePath = `./tmp/main.${hash}.tsx`;
     await promises_1.writeFile(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
-    import Component from "../${file}";
+    import Component from "../${file.replace(".tsx", "")}";
     (function (params: any) {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
@@ -57,7 +68,7 @@ function generateHtml(code, renderedHtml) {
   `;
 }
 async function main() {
-    await promises_1.mkdir(".tmp", { recursive: true });
+    await promises_1.mkdir("tmp", { recursive: true });
     const root = "pages";
     const files = await getFiles(root);
     const app = Express_1.express();

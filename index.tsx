@@ -5,6 +5,18 @@ import { join } from "path";
 import { renderToText, h } from "zheleznaya";
 import { Component } from "./h";
 
+function getOption(optionName: string) {
+  const index = process.argv.indexOf(optionName);
+  if (index === -1) {
+    return false;
+  }
+  const val = process.argv[index + 1];
+  if (val == null || val.startsWith("-")) {
+    return true;
+  }
+  return val;
+}
+
 async function getFiles(rootPath: string): Promise<string[]> {
   const names = await readdir(rootPath);
   const list = await Promise.all(names.map(async it => ({
@@ -17,12 +29,12 @@ async function getFiles(rootPath: string): Promise<string[]> {
 }
 
 async function generateCode(file: string): Promise<(parameter: { [key: string]: string }) => string> {
-  const hash = file.replace(/\//g, "_");
-  const tmpFilePath = `./.tmp/main.${hash}.tsx`;
+  const hash = file.replace(/\//g, "_").replace(/\./g, "_");
+  const tmpFilePath = `./tmp/main.${hash}.tsx`;
   await writeFile(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
-    import Component from "../${file}";
+    import Component from "../${file.replace(".tsx", "")}";
     (function (params: any) {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
@@ -57,7 +69,7 @@ function generateHtml(code: string, renderedHtml: string): string {
 }
 
 async function main() {
-  await mkdir(".tmp", { recursive: true });
+  await mkdir("tmp", { recursive: true });
   const root = "pages";
   const files = await getFiles(root)
   const app = express();

@@ -1,6 +1,6 @@
 {
   "name": "nzxt",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": "bin/nzxt.js",
@@ -15,7 +15,7 @@
     "typescript": "^4.0.3"
   },
   "devDependencies": {
-    "zheleznaya": "^0.1.6"
+    "zheleznaya": "latest"
   },
   "scripts": {
     "start": "ts-node --project tsconfig.app.json --files index.tsx",

@@ -73,33 +73,30 @@ async function main() {
   const root = "pages";
   const files = await getFiles(root)
   const app = express();
-
-  await Promise.all(
-    files.map(async file => {
-      const path = file
-        .replace(/_(.+)_/g, ":$1")
-        .replace(root, "")
-        .replace(/\/(.*)\.tsx$/g, "/$1")
-        .replace(/\/index$/g, "");
-      const codeGenerator = await generateCode(file);
-      app.get(path, async (req, res) => {
-        try {
-          const { default: Component }: { default: Component<{}> } = require(join(process.cwd(), `${file}`));
-          const initialProps = Component.getInitialPrpos
-            ? await Component.getInitialPrpos({ params: req.params })
-            : {};
-          const html = generateHtml(
-            codeGenerator({...req.params, ...initialProps}).trim(),
-            renderToText(<Component {...{...req.params, ...initialProps}} />).trim()
-          );
-          res.status(200).end(html);
-        } catch (e) {
-          console.error(e);
-          res.status(500).end("error");
-        }
-      });
-    })
-  );
+  for (const file of files) {
+    const path = file
+      .replace(/_(.+)_/g, ":$1")
+      .replace(root, "")
+      .replace(/\/(.*)\.tsx$/g, "/$1")
+      .replace(/\/index$/g, "");
+    const codeGenerator = await generateCode(file);
+    app.get(path, async (req, res) => {
+      try {
+        const { default: Component }: { default: Component<{}> } = require(join(process.cwd(), `${file}`));
+        const initialProps = Component.getInitialPrpos
+          ? await Component.getInitialPrpos({ params: req.params })
+          : {};
+        const html = generateHtml(
+          codeGenerator({...req.params, ...initialProps}).trim(),
+          renderToText(<Component {...{...req.params, ...initialProps}} />).trim()
+        );
+        res.status(200).end(html);
+      } catch (e) {
+        console.error(e);
+        res.status(500).end("error");
+      }
+    });
+  }
 
   await app.listen(8080);
 }

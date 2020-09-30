@@ -5261,9 +5261,9 @@ yn@3.1.1:
   resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
 
-zheleznaya@^0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.6.tgz#e7cb931d749b70f2b1a42d00cd9a2e0dc1d6fcb3"
-  integrity sha512-7X09ofucH70P1OAnQjpUpbxVAnGzq8nMWUxHUryk4Eik83rJF/fV7vMsQf+Uq5Tsh/emRgt7bzW518Y+Bj0SkA==
+zheleznaya@latest:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.7.tgz#84e7849b7a55a00029fea4a86017634f6169f74e"
+  integrity sha512-Yxh0Lh3NwzpIq7qaAkx0SL1x2ghBMZcIgVTPJWj/soonXEAcP9S2VPVFU06eRiim5FrHqlrFs975NBHHnNDnSw==
   dependencies:
     typescript "^3.8.2"

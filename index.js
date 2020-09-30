@@ -72,7 +72,7 @@ async function main() {
     const root = "pages";
     const files = await getFiles(root);
     const app = Express_1.express();
-    await Promise.all(files.map(async (file) => {
+    for (const file of files) {
         const path = file
             .replace(/_(.+)_/g, ":$1")
             .replace(root, "")
@@ -93,7 +93,7 @@ async function main() {
                 res.status(500).end("error");
             }
         });
-    }));
+    }
     await app.listen(8080);
 }
 main();

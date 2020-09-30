@@ -1,6 +1,6 @@
 {
   "name": "nzxt",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": "bin/nzxt.js",
@@ -13,7 +13,7 @@
     "summer-framework": "^0.2.4",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3",
-    "zheleznaya": "^0.1.4"
+    "zheleznaya": "^0.1.5"
   },
   "scripts": {
     "start": "ts-node --project tsconfig.app.json --files index.tsx",

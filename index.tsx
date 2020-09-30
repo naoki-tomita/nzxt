@@ -79,6 +79,7 @@ async function main() {
       .replace(root, "")
       .replace(/\/(.*)\.tsx$/g, "/$1")
       .replace(/\/index$/g, "");
+    console.log(file, path);
     const codeGenerator = await generateCode(file);
     app.get(path, async (req, res) => {
       try {
@@ -98,7 +99,7 @@ async function main() {
     });
   }
 
-  await app.listen(8080);
+  await app.listen(parseInt(process.env.PORT ?? "8080", 10));
 }
 
 main();

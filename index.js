@@ -71,7 +71,10 @@ async function main() {
         app.get(path, async (req, res) => {
             try {
                 const { default: Component } = require(path_1.join(process.cwd(), `${file}`));
-                const html = generateHtml(codeGenerator(req.params).trim(), zheleznaya_1.renderToText(zheleznaya_1.h(Component, Object.assign({}, req.params))).trim());
+                const initialProps = Component.getInitialPrpos
+                    ? await Component.getInitialPrpos({ params: req.params })
+                    : {};
+                const html = generateHtml(codeGenerator({ ...req.params, ...initialProps }).trim(), zheleznaya_1.renderToText(zheleznaya_1.h(Component, Object.assign({}, { ...req.params, ...initialProps }))).trim());
                 res.status(200).end(html);
             }
             catch (e) {

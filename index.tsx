@@ -3,6 +3,7 @@ import { express } from "summer-framework/dist/Express";
 import Bundler from "parcel";
 import { join } from "path";
 import { renderToText, h } from "zheleznaya";
+import { Component } from "./h";
 
 async function getFiles(rootPath: string): Promise<string[]> {
   const names = await readdir(rootPath);
@@ -71,10 +72,13 @@ async function main() {
       const codeGenerator = await generateCode(file);
       app.get(path, async (req, res) => {
         try {
-          const { default: Component } = require(join(process.cwd(), `${file}`));
+          const { default: Component }: { default: Component<{}> } = require(join(process.cwd(), `${file}`));
+          const initialProps = Component.getInitialPrpos
+            ? await Component.getInitialPrpos({ params: req.params })
+            : {};
           const html = generateHtml(
-            codeGenerator(req.params).trim(),
-            renderToText(<Component {...req.params} />).trim()
+            codeGenerator({...req.params, ...initialProps}).trim(),
+            renderToText(<Component {...{...req.params, ...initialProps}} />).trim()
           );
           res.status(200).end(html);
         } catch (e) {

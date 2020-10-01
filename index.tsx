@@ -75,11 +75,11 @@ async function main() {
   const app = express();
   for (const file of files) {
     const path = file
-      .replace(/\/_(.+)_\//g, "/:$1/")
-      .replace(/\/_(.+)_\./g, "/:$1.")
-      .replace(root, "")
-      .replace(/\/(.*)\.tsx$/g, "/$1")
-      .replace(/\/index$/g, "");
+      .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
+      .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
+      .replace(/\/(.*)\.tsx$/g, "/$1") // pages/xxx/foo.tsx => pages/xxx/foo
+      .replace(root, "") // pages/xxx/foo => /xxx replace only 1 time.
+      .replace(/\/index$/g, ""); // /xxx/index => /xxx
 
     if (path.includes("_error")) continue;
     if (path.includes("_document")) continue; // TODO: _document.

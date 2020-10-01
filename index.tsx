@@ -80,6 +80,11 @@ async function main() {
       .replace(root, "")
       .replace(/\/(.*)\.tsx$/g, "/$1")
       .replace(/\/index$/g, "");
+
+    if (path.includes("_error")) continue;
+    if (path.includes("_document")) continue; // TODO: _document.
+    if (path.includes("_app")) continue; // TODO: _app.
+
     const codeGenerator = await generateCode(file);
     app.get(path, async (req, res) => {
       try {

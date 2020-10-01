@@ -93,8 +93,12 @@ async function main() {
         );
         res.status(200).end(html);
       } catch (e) {
-        console.error(e);
-        res.status(500).end("error");
+        const { default: Component }: { default: Component<{}> } = require(join(process.cwd(), "pages", "_error"));
+        const html = generateHtml(
+          `console.error("Unexpeted error occured.")`,
+          renderToText(<Component />).trim()
+        );
+        res.status(200).end(html);
       }
     });
   }

@@ -90,8 +90,9 @@ async function main() {
                 res.status(200).end(html);
             }
             catch (e) {
-                console.error(e);
-                res.status(500).end("error");
+                const { default: Component } = require(path_1.join(process.cwd(), "pages", "_error"));
+                const html = generateHtml(`console.error("Unexpeted error occured.")`, zheleznaya_1.renderToText(zheleznaya_1.h(Component, null)).trim());
+                res.status(200).end(html);
             }
         });
     }

@@ -74,11 +74,11 @@ async function main() {
     const app = Express_1.express();
     for (const file of files) {
         const path = file
-            .replace(/_(.+)_/g, ":$1")
+            .replace(/\/_(.+)_\//g, "/:$1/")
+            .replace(/\/_(.+)_\./g, "/:$1.")
             .replace(root, "")
             .replace(/\/(.*)\.tsx$/g, "/$1")
             .replace(/\/index$/g, "");
-        console.log(file, path);
         const codeGenerator = await generateCode(file);
         app.get(path, async (req, res) => {
             try {
@@ -92,7 +92,7 @@ async function main() {
             catch (e) {
                 const { default: Component } = require(path_1.join(process.cwd(), "pages", "_error"));
                 const html = generateHtml(`console.error("Unexpeted error occured.")`, zheleznaya_1.renderToText(zheleznaya_1.h(Component, null)).trim());
-                res.status(200).end(html);
+                res.status(500).end(html);
             }
         });
     }

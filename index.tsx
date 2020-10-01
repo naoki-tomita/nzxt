@@ -75,11 +75,11 @@ async function main() {
   const app = express();
   for (const file of files) {
     const path = file
-      .replace(/_(.+)_/g, ":$1")
+      .replace(/\/_(.+)_\//g, "/:$1/")
+      .replace(/\/_(.+)_\./g, "/:$1.")
       .replace(root, "")
       .replace(/\/(.*)\.tsx$/g, "/$1")
       .replace(/\/index$/g, "");
-    console.log(file, path);
     const codeGenerator = await generateCode(file);
     app.get(path, async (req, res) => {
       try {
@@ -98,7 +98,7 @@ async function main() {
           `console.error("Unexpeted error occured.")`,
           renderToText(<Component />).trim()
         );
-        res.status(200).end(html);
+        res.status(500).end(html);
       }
     });
   }

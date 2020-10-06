@@ -4979,11 +4979,6 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^3.8.2:
-  version "3.9.7"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
-  integrity sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
-
 typescript@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.3.tgz#153bbd468ef07725c1df9c77e8b453f8d36abba5"
@@ -5261,9 +5256,7 @@ yn@3.1.1:
   resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
 
-zheleznaya@^0.1.10:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.10.tgz#afe21332ff0c511f5bbe92f8af41d8635d2e90b6"
-  integrity sha512-xVQ6HxA6GBwKyjPy/ofaJ/4ed/l7rF76HXgUwUECeCjPodw30y6TFJ7VW9bFHauJ1YXxqe4qpsmZBR9J7u+ejg==
-  dependencies:
-    typescript "^3.8.2"
+zheleznaya@latest:
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.12.tgz#02dfd03353ef53527623acf507b8b479e8bb2d2c"
+  integrity sha512-MMfKl6mqlTlY2JpCLGWF2nIawny0evucGxVrFp8H8H0GNOslbgGVay6C8/5wgvs8meRIEw9hXbhPmD8CssWFUQ==

@@ -98,10 +98,10 @@ async function main() {
         );
         res.status(200).end(html);
       } catch (e) {
-        const { default: Component }: { default: Component<{}> } = require(join(process.cwd(), "pages", "_error"));
+        const { default: Component }: { default: Component<{ error: Error }> } = require(join(process.cwd(), "pages", "_error"));
         const html = generateHtml(
           `console.error("Unexpeted error occured.")`,
-          renderToText(<Component />).trim()
+          renderToText(<Component error={e} />).trim()
         );
         res.status(500).end(html);
       }

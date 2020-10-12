@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -8,17 +27,6 @@ const Express_1 = require("summer-framework/dist/Express");
 const parcel_1 = __importDefault(require("parcel"));
 const path_1 = require("path");
 const zheleznaya_1 = require("zheleznaya");
-function getOption(optionName) {
-    const index = process.argv.indexOf(optionName);
-    if (index === -1) {
-        return false;
-    }
-    const val = process.argv[index + 1];
-    if (val == null || val.startsWith("-")) {
-        return true;
-    }
-    return val;
-}
 async function getFiles(rootPath) {
     const names = await promises_1.readdir(rootPath);
     const list = await Promise.all(names.map(async (it) => ({
@@ -49,29 +57,21 @@ async function generateCode(file) {
     const code = await promises_1.readFile(result.name);
     return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
 }
-function generateHtml(code, renderedHtml) {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  <div id="nzxt-app">${renderedHtml}</div>
-  <script>
-    ${code}
-  </script>
-</body>
-</html>
-  `;
-}
+const _Document = (_, children) => {
+    return (zheleznaya_1.h("html", { lang: "en" },
+        zheleznaya_1.h("head", null,
+            zheleznaya_1.h("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0" }),
+            zheleznaya_1.h("title", null, "Document")),
+        zheleznaya_1.h("body", null, children)));
+};
 async function main() {
     await promises_1.mkdir("tmp", { recursive: true });
     const root = "pages";
     const files = await getFiles(root);
     const app = Express_1.express();
+    const Document = files.includes("pages/_document.tsx")
+        ? (await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_document"))))).default
+        : _Document;
     for (const file of files) {
         const path = file
             .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
@@ -88,16 +88,20 @@ async function main() {
         const codeGenerator = await generateCode(file);
         app.get(path, async (req, res) => {
             try {
-                const { default: Component } = require(path_1.join(process.cwd(), `${file}`));
-                const initialProps = Component.getInitialPrpos
+                const { default: Component } = await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), `${file}`))));
+                const initialProps = typeof Component.getInitialPrpos === "function"
                     ? await Component.getInitialPrpos({ params: req.params })
                     : {};
-                const html = generateHtml(codeGenerator({ ...req.params, ...initialProps }).trim(), zheleznaya_1.renderToText(zheleznaya_1.h(Component, Object.assign({}, { ...req.params, ...initialProps }))).trim());
+                const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
+                    zheleznaya_1.h("div", { id: "nzxt-app" },
+                        zheleznaya_1.h(Component, Object.assign({}, initialProps))),
+                    zheleznaya_1.h("script", null, codeGenerator(initialProps)))).trim();
                 res.status(200).end(html);
             }
             catch (e) {
-                const { default: Component } = require(path_1.join(process.cwd(), "pages", "_error"));
-                const html = generateHtml(`console.error("Unexpeted error occured.")`, zheleznaya_1.renderToText(zheleznaya_1.h(Component, { error: e })).trim());
+                const { default: Component } = await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_error"))));
+                const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
+                    zheleznaya_1.h(Component, { error: e }))).trim();
                 res.status(500).end(html);
             }
         });

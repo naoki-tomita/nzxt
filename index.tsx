@@ -5,18 +5,6 @@ import { join } from "path";
 import { renderToText, h } from "zheleznaya";
 import { Component } from "./h";
 
-function getOption(optionName: string) {
-  const index = process.argv.indexOf(optionName);
-  if (index === -1) {
-    return false;
-  }
-  const val = process.argv[index + 1];
-  if (val == null || val.startsWith("-")) {
-    return true;
-  }
-  return val;
-}
-
 async function getFiles(rootPath: string): Promise<string[]> {
   const names = await readdir(rootPath);
   const list = await Promise.all(names.map(async it => ({
@@ -49,23 +37,18 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
   return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
 }
 
-function generateHtml(code: string, renderedHtml: string): string {
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  <div id="nzxt-app">${renderedHtml}</div>
-  <script>
-    ${code}
-  </script>
-</body>
-</html>
-  `;
+const _Document: Component = (_, children) => {
+  return (
+    <html lang="en">
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Document</title>
+    </head>
+    <body>
+      {children}
+    </body>
+    </html>
+  );
 }
 
 async function main() {
@@ -73,6 +56,9 @@ async function main() {
   const root = "pages";
   const files = await getFiles(root)
   const app = express();
+  const Document = files.includes("pages/_document.tsx")
+    ? (await import(join(process.cwd(), "pages", "_document"))).default
+    : _Document;
   for (const file of files) {
     const path = file
       .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
@@ -88,21 +74,28 @@ async function main() {
     const codeGenerator = await generateCode(file);
     app.get(path, async (req, res) => {
       try {
-        const { default: Component }: { default: Component<{}> } = require(join(process.cwd(), `${file}`));
-        const initialProps = Component.getInitialPrpos
+        const { default: Component }: { default: Component<{}> } = await import(join(process.cwd(), `${file}`));
+        const initialProps = typeof Component.getInitialPrpos === "function"
           ? await Component.getInitialPrpos({ params: req.params })
           : {};
-        const html = generateHtml(
-          codeGenerator({...req.params, ...initialProps}).trim(),
-          renderToText(<Component {...{...req.params, ...initialProps}} />).trim()
-        );
+        const html = renderToText(
+          <Document>
+            <div id="nzxt-app">
+              <Component {...initialProps} />
+            </div>
+            <script>
+            {codeGenerator(initialProps)}
+            </script>
+          </Document>
+        ).trim();
         res.status(200).end(html);
       } catch (e) {
-        const { default: Component }: { default: Component<{ error: Error }> } = require(join(process.cwd(), "pages", "_error"));
-        const html = generateHtml(
-          `console.error("Unexpeted error occured.")`,
-          renderToText(<Component error={e} />).trim()
-        );
+        const { default: Component }: { default: Component<{ error: Error }> } = await import(join(process.cwd(), "pages", "_error"));
+        const html = renderToText(
+          <Document>
+            <Component error={e} />
+          </Document>
+        ).trim();
         res.status(500).end(html);
       }
     });

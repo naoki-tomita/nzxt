@@ -52,7 +52,7 @@ const _Document: Component = (_, children) => {
 }
 
 async function main() {
-  const command = process.argv[1] ?? "start";
+  const command = process.argv[2] ?? "start";
   await mkdir("tmp", { recursive: true });
   const root = "pages";
   const files = await getFiles(root)

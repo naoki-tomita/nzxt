@@ -65,7 +65,7 @@ const _Document = (_, children) => {
         zheleznaya_1.h("body", null, children)));
 };
 async function main() {
-    const command = process.argv[1] ?? "start";
+    const command = process.argv[2] ?? "start";
     await promises_1.mkdir("tmp", { recursive: true });
     const root = "pages";
     const files = await getFiles(root);

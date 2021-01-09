@@ -52,6 +52,7 @@ const _Document: Component = (_, children) => {
 }
 
 async function main() {
+  const command = process.argv[1] ?? "start";
   await mkdir("tmp", { recursive: true });
   const root = "pages";
   const files = await getFiles(root)
@@ -99,6 +100,10 @@ async function main() {
         res.status(500).end(html);
       }
     });
+  }
+
+  if (command === "build") {
+    return;
   }
 
   await app.listen(parseInt(process.env.PORT ?? "8080", 10));

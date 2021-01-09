@@ -65,6 +65,7 @@ const _Document = (_, children) => {
         zheleznaya_1.h("body", null, children)));
 };
 async function main() {
+    const command = process.argv[1] ?? "start";
     await promises_1.mkdir("tmp", { recursive: true });
     const root = "pages";
     const files = await getFiles(root);
@@ -105,6 +106,9 @@ async function main() {
                 res.status(500).end(html);
             }
         });
+    }
+    if (command === "build") {
+        return;
     }
     await app.listen(parseInt(process.env.PORT ?? "8080", 10));
 }

@@ -6,16 +6,16 @@
   "bin": "bin/nzxt.js",
   "license": "MIT",
   "dependencies": {
-    "@babel/core": "^7.11.6",
-    "@types/babel__core": "^7.1.10",
-    "@types/node": "^14.11.2",
+    "@babel/core": "^7.12.10",
+    "@types/babel__core": "^7.1.12",
+    "@types/node": "^14.14.20",
     "parcel": "^1.12.4",
     "summer-framework": "^0.2.4",
-    "ts-node": "^9.0.0",
-    "typescript": "^4.0.3"
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
   },
   "devDependencies": {
-    "zheleznaya": "latest"
+    "zheleznaya": "^0.1.17"
   },
   "scripts": {
     "start": "ts-node --project tsconfig.app.json --files index.tsx",

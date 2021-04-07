@@ -22,14 +22,15 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
   await writeFile(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
-    import Component from "../${file.replace(".tsx", "")}";
+    import Component from "../${file.replace(".tsx", "").replace(".jsx", "")}";
     (function (params: any) {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
   console.log(`Building ${file}...`);
   const start = Date.now();
-  const { outputFiles: [result], warnings } = await build({
+  const { outputFiles: [{ text: code }], warnings } = await build({
+    entryPoints: [tmpFilePath],
     treeShaking: true,
     write: false,
     bundle: true,
@@ -38,7 +39,7 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
   });
   warnings.length > 0 && console.warn(warnings.map(it => `${it.text}`).join("\n"));
   console.log(`Built ${file} by ${Date.now() - start}ms`);
-  return parameter => `var parameter = ${JSON.stringify(parameter)}; ${result.text}`;
+  return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
 }
 
 const _Document: Component = (_, children) => {
@@ -55,15 +56,27 @@ const _Document: Component = (_, children) => {
   );
 }
 
+const _Error: Component<{ error: Error }> = ({ error }) => {
+  return (
+    <div>
+      <h1>An error occured</h1>
+      <code>{error.stack}</code>
+    </div>
+  );
+}
+
 async function main() {
   const command = process.argv[2] ?? "start";
   await mkdir(".tmp", { recursive: true });
   const root = "pages";
   const files = await getFiles(root)
   const app = express();
-  const Document = files.includes("pages/_document.tsx")
+  const Document = files.some(it => it.startsWith("pages/_document.tsx"))
     ? (await import(join(process.cwd(), "pages", "_document"))).default
     : _Document;
+  const Error = files.some(it => it.startsWith("pages/_error"))
+    ? (await import(join(process.cwd(), "pages", "_error"))).default
+    : _Error;
 
   await Promise.all(
     files.map(async file => {
@@ -97,10 +110,9 @@ async function main() {
           ).trim();
           res.status(200).end(html);
         } catch (e) {
-          const { default: Component }: { default: Component<{ error: Error }> } = await import(join(process.cwd(), "pages", "_error"));
           const html = renderToText(
             <Document>
-              <Component error={e} />
+              <Error error={e} />
             </Document>
           ).trim();
           res.status(500).end(html);

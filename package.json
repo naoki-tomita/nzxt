@@ -13,6 +13,8 @@
     "typescript": "^4.1.3"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.5.9",
+    "node-fetch": "^2.6.1",
     "zheleznaya": "^0.1.17"
   },
   "scripts": {

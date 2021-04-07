@@ -40,14 +40,15 @@ async function generateCode(file) {
     await promises_1.writeFile(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
-    import Component from "../${file.replace(".tsx", "")}";
+    import Component from "../${file.replace(".tsx", "").replace(".jsx", "")}";
     (function (params: any) {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
     console.log(`Building ${file}...`);
     const start = Date.now();
-    const { outputFiles: [result], warnings } = await esbuild_1.build({
+    const { outputFiles: [{ text: code }], warnings } = await esbuild_1.build({
+        entryPoints: [tmpFilePath],
         treeShaking: true,
         write: false,
         bundle: true,
@@ -56,7 +57,7 @@ async function generateCode(file) {
     });
     warnings.length > 0 && console.warn(warnings.map(it => `${it.text}`).join("\n"));
     console.log(`Built ${file} by ${Date.now() - start}ms`);
-    return parameter => `var parameter = ${JSON.stringify(parameter)}; ${result.text}`;
+    return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
 }
 const _Document = (_, children) => {
     return (zheleznaya_1.h("html", { lang: "en" },
@@ -65,15 +66,23 @@ const _Document = (_, children) => {
             zheleznaya_1.h("title", null, "Document")),
         zheleznaya_1.h("body", null, children)));
 };
+const _Error = ({ error }) => {
+    return (zheleznaya_1.h("div", null,
+        zheleznaya_1.h("h1", null, "An error occured"),
+        zheleznaya_1.h("code", null, error.stack)));
+};
 async function main() {
     const command = process.argv[2] ?? "start";
     await promises_1.mkdir(".tmp", { recursive: true });
     const root = "pages";
     const files = await getFiles(root);
     const app = Express_1.express();
-    const Document = files.includes("pages/_document.tsx")
+    const Document = files.some(it => it.startsWith("pages/_document.tsx"))
         ? (await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_document"))))).default
         : _Document;
+    const Error = files.some(it => it.startsWith("pages/_error"))
+        ? (await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_error"))))).default
+        : _Error;
     await Promise.all(files.map(async (file) => {
         const path = file
             .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
@@ -101,9 +110,8 @@ async function main() {
                 res.status(200).end(html);
             }
             catch (e) {
-                const { default: Component } = await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_error"))));
                 const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
-                    zheleznaya_1.h(Component, { error: e }))).trim();
+                    zheleznaya_1.h(Error, { error: e }))).trim();
                 res.status(500).end(html);
             }
         });

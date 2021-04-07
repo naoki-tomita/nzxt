@@ -1,6 +1,6 @@
-import { readdir, readFile, stat, writeFile, mkdir } from "fs/promises";
+import { readdir, stat, writeFile, mkdir } from "fs/promises";
+import { build, transform } from "esbuild";
 import { express } from "summer-framework/dist/Express";
-import Bundler from "parcel";
 import { join } from "path";
 import { renderToText, h } from "zheleznaya";
 import { Component } from "./h";
@@ -18,7 +18,7 @@ async function getFiles(rootPath: string): Promise<string[]> {
 
 async function generateCode(file: string): Promise<(parameter: { [key: string]: string }) => string> {
   const hash = file.replace(/\//g, "_").replace(/\./g, "_");
-  const tmpFilePath = `./tmp/main.${hash}.tsx`;
+  const tmpFilePath = `./.tmp/main.${hash}.tsx`;
   await writeFile(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
@@ -27,14 +27,18 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
-  const bundler = new Bundler([tmpFilePath], {
-    watch: false,
-    sourceMaps: false,
-    production: true,
+  console.log(`Building ${file}...`);
+  const start = Date.now();
+  const { outputFiles: [result], warnings } = await build({
+    treeShaking: true,
+    write: false,
+    bundle: true,
+    minify: true,
+    tsconfig: "./tsconfig.json"
   });
-  const result = await bundler.bundle();
-  const code = await readFile(result.name);
-  return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
+  warnings.length > 0 && console.warn(warnings.map(it => `${it.text}`).join("\n"));
+  console.log(`Built ${file} by ${Date.now() - start}ms`);
+  return parameter => `var parameter = ${JSON.stringify(parameter)}; ${result.text}`;
 }
 
 const _Document: Component = (_, children) => {
@@ -53,54 +57,57 @@ const _Document: Component = (_, children) => {
 
 async function main() {
   const command = process.argv[2] ?? "start";
-  await mkdir("tmp", { recursive: true });
+  await mkdir(".tmp", { recursive: true });
   const root = "pages";
   const files = await getFiles(root)
   const app = express();
   const Document = files.includes("pages/_document.tsx")
     ? (await import(join(process.cwd(), "pages", "_document"))).default
     : _Document;
-  for (const file of files) {
-    const path = file
-      .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
-      .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
-      .replace(/\/(.*)\.tsx$/g, "/$1") // pages/xxx/foo.tsx => pages/xxx/foo
-      .replace(root, "") // pages/xxx/foo => /xxx replace only 1 time.
-      .replace(/\/index$/g, ""); // /xxx/index => /xxx
 
-    if (path.includes("_error")) continue;
-    if (path.includes("_document")) continue; // TODO: _document.
-    if (path.includes("_app")) continue; // TODO: _app.
+  await Promise.all(
+    files.map(async file => {
+      const path = file
+        .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
+        .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
+        .replace(/\/(.*)\.tsx$/g, "/$1") // pages/xxx/foo.tsx => pages/xxx/foo
+        .replace(root, "") // pages/xxx/foo => /xxx replace only 1 time.
+        .replace(/\/index$/g, ""); // /xxx/index => /xxx
 
-    const codeGenerator = await generateCode(file);
-    app.get(path, async (req, res) => {
-      try {
-        const { default: Component }: { default: Component<{}> } = await import(join(process.cwd(), `${file}`));
-        const initialProps = typeof Component.getInitialPrpos === "function"
-          ? await Component.getInitialPrpos({ params: req.params })
-          : {};
-        const html = renderToText(
-          <Document>
-            <div id="nzxt-app">
-              <Component {...initialProps} />
-            </div>
-            <script>
-            {codeGenerator(initialProps)}
-            </script>
-          </Document>
-        ).trim();
-        res.status(200).end(html);
-      } catch (e) {
-        const { default: Component }: { default: Component<{ error: Error }> } = await import(join(process.cwd(), "pages", "_error"));
-        const html = renderToText(
-          <Document>
-            <Component error={e} />
-          </Document>
-        ).trim();
-        res.status(500).end(html);
-      }
-    });
-  }
+      if (path.includes("_error")) return;
+      if (path.includes("_document")) return;
+      if (path.includes("_app")) return; // TODO: _app.
+
+      const codeGenerator = await generateCode(file);
+      app.get(path, async (req, res) => {
+        try {
+          const { default: Component }: { default: Component<{}> } = await import(join(process.cwd(), `${file}`));
+          const initialProps = typeof Component.getInitialPrpos === "function"
+            ? await Component.getInitialPrpos({ params: req.params })
+            : {};
+          const html = renderToText(
+            <Document>
+              <div id="nzxt-app">
+                <Component {...initialProps} />
+              </div>
+              <script>
+              {codeGenerator(initialProps)}
+              </script>
+            </Document>
+          ).trim();
+          res.status(200).end(html);
+        } catch (e) {
+          const { default: Component }: { default: Component<{ error: Error }> } = await import(join(process.cwd(), "pages", "_error"));
+          const html = renderToText(
+            <Document>
+              <Component error={e} />
+            </Document>
+          ).trim();
+          res.status(500).end(html);
+        }
+      });
+    })
+  );
 
   if (command === "build") {
     return;

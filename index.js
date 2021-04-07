@@ -18,13 +18,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const promises_1 = require("fs/promises");
+const esbuild_1 = require("esbuild");
 const Express_1 = require("summer-framework/dist/Express");
-const parcel_1 = __importDefault(require("parcel"));
 const path_1 = require("path");
 const zheleznaya_1 = require("zheleznaya");
 async function getFiles(rootPath) {
@@ -39,7 +36,7 @@ async function getFiles(rootPath) {
 }
 async function generateCode(file) {
     const hash = file.replace(/\//g, "_").replace(/\./g, "_");
-    const tmpFilePath = `./tmp/main.${hash}.tsx`;
+    const tmpFilePath = `./.tmp/main.${hash}.tsx`;
     await promises_1.writeFile(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
@@ -48,14 +45,18 @@ async function generateCode(file) {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
-    const bundler = new parcel_1.default([tmpFilePath], {
-        watch: false,
-        sourceMaps: false,
-        production: true,
+    console.log(`Building ${file}...`);
+    const start = Date.now();
+    const { outputFiles: [result], warnings } = await esbuild_1.build({
+        treeShaking: true,
+        write: false,
+        bundle: true,
+        minify: true,
+        tsconfig: "./tsconfig.json"
     });
-    const result = await bundler.bundle();
-    const code = await promises_1.readFile(result.name);
-    return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
+    warnings.length > 0 && console.warn(warnings.map(it => `${it.text}`).join("\n"));
+    console.log(`Built ${file} by ${Date.now() - start}ms`);
+    return parameter => `var parameter = ${JSON.stringify(parameter)}; ${result.text}`;
 }
 const _Document = (_, children) => {
     return (zheleznaya_1.h("html", { lang: "en" },
@@ -66,14 +67,14 @@ const _Document = (_, children) => {
 };
 async function main() {
     const command = process.argv[2] ?? "start";
-    await promises_1.mkdir("tmp", { recursive: true });
+    await promises_1.mkdir(".tmp", { recursive: true });
     const root = "pages";
     const files = await getFiles(root);
     const app = Express_1.express();
     const Document = files.includes("pages/_document.tsx")
         ? (await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_document"))))).default
         : _Document;
-    for (const file of files) {
+    await Promise.all(files.map(async (file) => {
         const path = file
             .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
             .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
@@ -81,11 +82,11 @@ async function main() {
             .replace(root, "") // pages/xxx/foo => /xxx replace only 1 time.
             .replace(/\/index$/g, ""); // /xxx/index => /xxx
         if (path.includes("_error"))
-            continue;
+            return;
         if (path.includes("_document"))
-            continue; // TODO: _document.
+            return;
         if (path.includes("_app"))
-            continue; // TODO: _app.
+            return; // TODO: _app.
         const codeGenerator = await generateCode(file);
         app.get(path, async (req, res) => {
             try {
@@ -106,7 +107,7 @@ async function main() {
                 res.status(500).end(html);
             }
         });
-    }
+    }));
     if (command === "build") {
         return;
     }

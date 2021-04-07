@@ -1,6 +1,6 @@
 {
   "name": "nzxt",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": "bin/nzxt.js",
@@ -19,6 +19,7 @@
   },
   "scripts": {
     "start": "ts-node --project tsconfig.app.json --files index.tsx",
-    "build": "tsc --project tsconfig.json"
+    "build": "tsc --project tsconfig.json",
+    "prepublish": "yarn build"
   }
 }

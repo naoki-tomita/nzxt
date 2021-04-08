@@ -1,9 +1,14 @@
 import { Component, h } from "../../h";
+import { readFile } from "fs/promises";
+
 import fetch from "node-fetch";
 
-const Top: Component<{ star: number }> = ({ star }) => {
+const Top: Component<{ star: number; file: string }> = ({ star, file }) => {
   return (
-    <div>Top: {star}</div>
+    <div>
+      <div>Top: {star}</div>
+      <pre>{file}</pre>
+    </div>
   );
 }
 
@@ -11,8 +16,10 @@ Top.getInitialPrpos = async () => {
   const starCount = await fetch("https://api.github.com/repos/naoki-tomita/nzxt")
     .then(it => it.json())
     .then((it: { stargazers_count: number }) => it.stargazers_count);
+  const file = await readFile("./README.md").then(it => it.toString("utf-8"));
   return {
-    star: starCount
+    star: starCount,
+    file
   };
 }
 

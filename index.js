@@ -53,11 +53,20 @@ async function generateCode(file) {
         write: false,
         bundle: true,
         minify: true,
+        external: NodeModules,
         tsconfig: "./tsconfig.json"
     });
     warnings.length > 0 && console.warn(warnings.map(it => `${it.text}`).join("\n"));
     console.log(`Built ${file} by ${Date.now() - start}ms`);
-    return parameter => `var parameter = ${JSON.stringify(parameter)}; ${code}`;
+    return parameter => `
+    var parameter = ${JSON.stringify(parameter)};
+    function require(moduleName) {
+      var errFn = function() { throw Error("This module is not callable on browser."); }
+      var obj = new Proxy(errFn, { get(_, key) { return obj; } });
+      return obj;
+    };
+    ${code}
+  `;
 }
 const _Document = (_, children) => {
     return (zheleznaya_1.h("html", { lang: "en" },
@@ -122,4 +131,46 @@ async function main() {
     await app.listen(parseInt(process.env.PORT ?? "8080", 10));
 }
 main();
+const NodeModules = [
+    "child_process",
+    "assert",
+    "async_hooks",
+    "buffer",
+    "cluster",
+    "constants",
+    "crypto",
+    "dgram",
+    "dns",
+    "domain",
+    "events",
+    "fs",
+    "fs/promises",
+    "http",
+    "http2",
+    "https",
+    "inspector",
+    "module",
+    "net",
+    "os",
+    "path",
+    "perf_hooks",
+    "process",
+    "punycode",
+    "querystring",
+    "readline",
+    "repl",
+    "stream",
+    "string_decoder",
+    "timers",
+    "tls",
+    "trace_events",
+    "tty",
+    "url",
+    "util",
+    "v8",
+    "vm",
+    "wasi",
+    "worker_threads",
+    "zlib",
+];
 //# sourceMappingURL=index.js.map

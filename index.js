@@ -122,7 +122,7 @@ async function main() {
             catch (e) {
                 const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
                     zheleznaya_1.h(Error, { error: e }))).trim();
-                res.status(500).end(html);
+                res.status(500).end(DocType + html);
             }
         });
     }));

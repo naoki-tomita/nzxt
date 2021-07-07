@@ -80,6 +80,7 @@ const _Error = ({ error }) => {
         zheleznaya_1.h("h1", null, "An error occured"),
         zheleznaya_1.h("code", null, error.stack)));
 };
+const DocType = "<!DOCTYPE html>";
 async function main() {
     const command = process.argv[2] ?? "start";
     await promises_1.mkdir(".tmp", { recursive: true });
@@ -114,9 +115,9 @@ async function main() {
                     : {};
                 const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
                     zheleznaya_1.h("div", { id: "nzxt-app" },
-                        zheleznaya_1.h(Component, Object.assign({}, initialProps))),
+                        zheleznaya_1.h(Component, { ...initialProps })),
                     zheleznaya_1.h("script", null, codeGenerator(initialProps)))).trim();
-                res.status(200).end(html);
+                res.status(200).end(DocType + html);
             }
             catch (e) {
                 const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,

@@ -6,16 +6,16 @@
   "bin": "bin/nzxt.js",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^14.14.37",
-    "esbuild": "^0.11.5",
+    "esbuild": "^0.12.15",
     "summer-framework": "^0.2.4",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.3"
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.5"
   },
   "devDependencies": {
+    "@types/node": "^14.14.37",
     "@types/node-fetch": "^2.5.9",
     "node-fetch": "^2.6.1",
-    "zheleznaya": "^0.1.17"
+    "zheleznaya": "^0.1.18"
   },
   "scripts": {
     "start": "ts-node --project tsconfig.app.json --files index.tsx",

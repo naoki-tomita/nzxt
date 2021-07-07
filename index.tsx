@@ -74,6 +74,8 @@ const _Error: Component<{ error: Error }> = ({ error }) => {
   );
 }
 
+const DocType = "<!DOCTYPE html>"
+
 async function main() {
   const command = process.argv[2] ?? "start";
   await mkdir(".tmp", { recursive: true });
@@ -117,7 +119,7 @@ async function main() {
               </script>
             </Document>
           ).trim();
-          res.status(200).end(html);
+          res.status(200).end(DocType + html);
         } catch (e) {
           const html = renderToText(
             <Document>

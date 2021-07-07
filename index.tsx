@@ -126,7 +126,7 @@ async function main() {
               <Error error={e} />
             </Document>
           ).trim();
-          res.status(500).end(html);
+          res.status(500).end(DocType + html);
         }
       });
     })

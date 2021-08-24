@@ -129,8 +129,20 @@ async function main() {
     if (command === "build") {
         return;
     }
+    app.get("/images/:filename", async (req, res) => {
+        const { filename } = req.params;
+        const file = await promises_1.readFile(path_1.join("./public/images", filename));
+        res.status(200).header({ "content-type": ContentTypes[path_1.extname(filename)] }).end(file);
+    });
     await app.listen(parseInt(process.env.PORT ?? "8080", 10));
 }
+const ContentTypes = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".bmp": "image/bmp"
+};
 main();
 const NodeModules = [
     "child_process",

@@ -1,7 +1,7 @@
-import { readdir, stat, writeFile, mkdir } from "fs/promises";
+import { readdir, stat, writeFile, mkdir, readFile } from "fs/promises";
 import { build } from "esbuild";
 import { express } from "summer-framework/dist/Express";
-import { join } from "path";
+import { join, extname } from "path";
 import { renderToText, h } from "zheleznaya";
 import { Component } from "./h";
 
@@ -135,8 +135,20 @@ async function main() {
   if (command === "build") {
     return;
   }
-
+  app.get("/images/:filename", async (req, res) => {
+    const { filename } = req.params;
+    const file = await readFile(join("./public/images", filename));
+    res.status(200).header({ "content-type": ContentTypes[extname(filename) as keyof typeof ContentTypes] }).end(file);
+  });
   await app.listen(parseInt(process.env.PORT ?? "8080", 10));
+}
+
+const ContentTypes = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".bmp": "image/bmp"
 }
 
 main();

@@ -8,6 +8,7 @@ const Top: Component<{ star: number; file: string }> = ({ star, file }) => {
     <div>
       <div>Top: {star}</div>
       <pre>{file}</pre>
+      <img src="/images/logo.png" />
     </div>
   );
 }

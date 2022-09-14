@@ -119,14 +119,14 @@ export async function create() {
               </script>
             </Document>
           ).trim();
-          res.status(200).end(DocType + html);
+          res.status(200).body(DocType + html);
         } catch (e) {
           const html = renderToText(
             <Document>
               <Error error={e} />
             </Document>
           ).trim();
-          res.status(500).end(DocType + html);
+          res.status(500).body(DocType + html);
         }
       });
     })

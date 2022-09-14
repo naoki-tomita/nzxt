@@ -118,12 +118,12 @@ async function create() {
                     zheleznaya_1.h("div", { id: "nzxt-app" },
                         zheleznaya_1.h(Component, { ...initialProps })),
                     zheleznaya_1.h("script", null, codeGenerator(initialProps)))).trim();
-                res.status(200).end(DocType + html);
+                res.status(200).body(DocType + html);
             }
             catch (e) {
                 const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
                     zheleznaya_1.h(Error, { error: e }))).trim();
-                res.status(500).end(DocType + html);
+                res.status(500).body(DocType + html);
             }
         });
     }));

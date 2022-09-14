@@ -126,10 +126,10 @@ source-map@^0.6.0:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
-summer-framework@^0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/summer-framework/-/summer-framework-0.2.4.tgz#9322a87a6aabbec83eb951632449ded0997e0c1e"
-  integrity sha512-Uq5SzzeJT8NKz+ImjPDeJWaePXN4bQcWpFCOoFmtz7VsjlWqnoBZ4fQzCp8L+HjCJ/ygDapvCi/1ZcP6yzY76w==
+summer-framework@^0.2.7:
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/summer-framework/-/summer-framework-0.2.7.tgz#509ff62e4f84b109be58821b0c695d69535cfef2"
+  integrity sha512-bXP3VE09AdkOp6JGROF7h+neOMPAnO3vR94ZNGBMWeIPbPnkWnx5EwItOqhFIWf0D4lKUgr6L4PZ7clD7gYQvQ==
 
 ts-node@^10.0.0:
   version "10.0.0"

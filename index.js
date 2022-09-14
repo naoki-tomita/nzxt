@@ -19,6 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.create = void 0;
 const promises_1 = require("fs/promises");
 const esbuild_1 = require("esbuild");
 const Express_1 = require("summer-framework/dist/Express");
@@ -81,7 +82,7 @@ const _Error = ({ error }) => {
         zheleznaya_1.h("code", null, error.stack)));
 };
 const DocType = "<!DOCTYPE html>";
-async function main() {
+async function create() {
     const command = process.argv[2] ?? "start";
     await promises_1.mkdir(".tmp", { recursive: true });
     const root = "pages";
@@ -134,8 +135,9 @@ async function main() {
         const file = await promises_1.readFile(path_1.join("./public/images", filename));
         res.status(200).header({ "content-type": ContentTypes[path_1.extname(filename)] }).end(file);
     });
-    await app.listen(parseInt(process.env.PORT ?? "8080", 10));
+    return app;
 }
+exports.create = create;
 const ContentTypes = {
     ".png": "image/png",
     ".jpg": "image/jpeg",
@@ -144,7 +146,6 @@ const ContentTypes = {
     ".bmp": "image/bmp",
     ".svg": "image/svg+xml"
 };
-main();
 const NodeModules = [
     "child_process",
     "assert",

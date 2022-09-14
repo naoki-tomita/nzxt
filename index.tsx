@@ -76,7 +76,7 @@ const _Error: Component<{ error: Error }> = ({ error }) => {
 
 const DocType = "<!DOCTYPE html>"
 
-async function main() {
+export async function create() {
   const command = process.argv[2] ?? "start";
   await mkdir(".tmp", { recursive: true });
   const root = "pages";
@@ -140,7 +140,10 @@ async function main() {
     const file = await readFile(join("./public/images", filename));
     res.status(200).header({ "content-type": ContentTypes[extname(filename) as keyof typeof ContentTypes] }).end(file);
   });
-  await app.listen(parseInt(process.env.PORT ?? "8080", 10));
+  return app as unknown as {
+    close(): void;
+    listen(port: number): Promise<void>;
+  };
 }
 
 const ContentTypes = {
@@ -151,8 +154,6 @@ const ContentTypes = {
   ".bmp": "image/bmp",
   ".svg": "image/svg+xml"
 }
-
-main();
 
 const NodeModules = [
   "child_process",

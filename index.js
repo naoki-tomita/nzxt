@@ -178,7 +178,7 @@ async function command(command) {
 }
 exports.command = command;
 async function create() {
-    return;
+    return serveCommand();
 }
 exports.create = create;
 const ContentTypes = {

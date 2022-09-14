@@ -16,7 +16,7 @@ async function getFiles(rootPath: string): Promise<string[]> {
   return [...files, ...(await Promise.all(dirs.map(it => getFiles(it)))).flat()];
 }
 
-async function generateCode(file: string): Promise<(parameter: { [key: string]: string }) => string> {
+async function generateCode(file: string): Promise<string> {
   const hash = file.replace(/\//g, "_").replace(/\./g, "_");
   const tmpFilePath = `./.tmp/main.${hash}.tsx`;
   await writeFile(tmpFilePath, `
@@ -40,6 +40,10 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
   });
   warnings.length > 0 && console.warn(warnings.map(it => `${it.text}`).join("\n"));
   console.log(`Built ${file} by ${Date.now() - start}ms`);
+  return code;
+}
+
+function toCodeTemplate(code: string): (parameter: { [key: string]: string }) => string {
   return parameter => `
     var parameter = ${JSON.stringify(parameter)};
     function require(moduleName) {
@@ -49,6 +53,16 @@ async function generateCode(file: string): Promise<(parameter: { [key: string]: 
     };
     ${code}
   `;
+}
+
+async function generateCodeAndGetCodeTemplate(file: string) {
+  const code = await generateCode(file);
+  return toCodeTemplate(code);
+}
+
+async function getCodeTemplate(file: string) {
+  const code = await readFile(file).then(it => it.toString("utf-8"));
+  return toCodeTemplate(code);
 }
 
 const _Document: Component = (_, children) => {
@@ -76,18 +90,10 @@ const _Error: Component<{ error: Error }> = ({ error }) => {
 
 const DocType = "<!DOCTYPE html>"
 
-export async function create() {
-  const command = process.argv[2] ?? "start";
+async function buildCommand() {
   await mkdir(".tmp", { recursive: true });
   const root = "pages";
   const files = await getFiles(root)
-  const app = express();
-  const Document = files.some(it => it.startsWith("pages/_document.tsx"))
-    ? (await import(join(process.cwd(), "pages", "_document"))).default
-    : _Document;
-  const Error = files.some(it => it.startsWith("pages/_error"))
-    ? (await import(join(process.cwd(), "pages", "_error"))).default
-    : _Error;
 
   await Promise.all(
     files.map(async file => {
@@ -102,39 +108,62 @@ export async function create() {
       if (path.includes("_document")) return;
       if (path.includes("_app")) return; // TODO: _app.
 
-      const codeGenerator = await generateCode(file);
-      app.get(path, async (req, res) => {
-        try {
-          const { default: Component }: { default: Component<{}> } = await import(join(process.cwd(), `${file}`));
-          const initialProps = typeof Component.getInitialPrpos === "function"
-            ? await Component.getInitialPrpos({ params: req.params })
-            : {};
-          const html = renderToText(
-            <Document>
-              <div id="nzxt-app">
-                <Component {...initialProps} />
-              </div>
-              <script>
-              {codeGenerator(initialProps)}
-              </script>
-            </Document>
-          ).trim();
-          res.status(200).body(DocType + html);
-        } catch (e) {
-          const html = renderToText(
-            <Document>
-              <Error error={e} />
-            </Document>
-          ).trim();
-          res.status(500).body(DocType + html);
-        }
-      });
+      await generateCode(file);
     })
   );
+}
 
-  if (command === "build") {
-    return;
-  }
+async function serveCommand() {
+  const root = "pages";
+  const files = await getFiles(root);
+  const Document = files.some(it => it.startsWith("pages/_document.tsx"))
+    ? (await import(join(process.cwd(), "pages", "_document"))).default
+    : _Document;
+  const Error = files.some(it => it.startsWith("pages/_error"))
+    ? (await import(join(process.cwd(), "pages", "_error"))).default
+    : _Error;
+
+  const app = express();
+  Promise.all(files.map(async file => {
+    const path = file
+        .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
+        .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
+        .replace(/\/(.*)\.tsx$/g, "/$1") // pages/xxx/foo.tsx => pages/xxx/foo
+        .replace(root, "") // pages/xxx/foo => /xxx replace only 1 time.
+        .replace(/\/index$/g, ""); // /xxx/index => /xxx
+
+      if (path.includes("_error")) return;
+      if (path.includes("_document")) return;
+      if (path.includes("_app")) return; // TODO: _app.
+    const codeTemplate = await getCodeTemplate(file);
+    app.get(path, async (req, res) => {
+      try {
+        const { default: Component }: { default: Component<{}> } = await import(join(process.cwd(), `${file}`));
+        const initialProps = typeof Component.getInitialPrpos === "function"
+          ? await Component.getInitialPrpos({ params: req.params })
+          : {};
+        const html = renderToText(
+          <Document>
+            <div id="nzxt-app">
+              <Component {...initialProps} />
+            </div>
+            <script>
+            {codeTemplate(initialProps)}
+            </script>
+          </Document>
+        ).trim();
+        res.status(200).body(DocType + html);
+      } catch (e) {
+        const html = renderToText(
+          <Document>
+            <Error error={e} />
+          </Document>
+        ).trim();
+        res.status(500).body(DocType + html);
+      }
+    });
+  }));
+
   app.get("/images/:filename", async (req, res) => {
     const { filename } = req.params;
     const file = await readFile(join("./public/images", filename));
@@ -144,6 +173,23 @@ export async function create() {
     close(): void;
     listen(port: number): Promise<void>;
   };
+
+}
+
+export async function command(command?: string) {
+  command = command ?? process.argv[2] ?? "start";
+  if (command === "build") {
+    await buildCommand();
+  } else if (command === "start") {
+    await buildCommand();
+    return serveCommand();
+  } else if (command === "serve") {
+    return serveCommand();
+  }
+}
+
+export async function create() {
+  return serveCommand();
 }
 
 const ContentTypes = {

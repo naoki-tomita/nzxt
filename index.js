@@ -159,11 +159,10 @@ async function serveCommand() {
     app.get("/images/:filename", async (req, res) => {
         const { filename } = req.params;
         const file = await promises_1.readFile(path_1.join("./public/images", filename));
-        console.log(file);
         res
             .status(200)
             .header({ "content-type": ContentTypes[path_1.extname(filename)] })
-            .end(file, () => console.log("end!!"));
+            .end(file);
     });
     return app;
 }

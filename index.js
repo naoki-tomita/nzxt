@@ -46,7 +46,6 @@ async function generateCode(file) {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
-    return buildCode(file);
 }
 async function buildCode(file) {
     const hash = file.replace(/\//g, "_").replace(/\./g, "_");
@@ -76,10 +75,6 @@ function toCodeTemplate(code) {
     };
     ${code}
   `;
-}
-async function generateCodeAndGetCodeTemplate(file) {
-    const code = await generateCode(file);
-    return toCodeTemplate(code);
 }
 async function getCodeTemplate(file) {
     const code = await buildCode(file);
@@ -164,7 +159,11 @@ async function serveCommand() {
     app.get("/images/:filename", async (req, res) => {
         const { filename } = req.params;
         const file = await promises_1.readFile(path_1.join("./public/images", filename));
-        res.status(200).header({ "content-type": ContentTypes[path_1.extname(filename)] }).end(file);
+        console.log(file);
+        res
+            .status(200)
+            .header({ "content-type": ContentTypes[path_1.extname(filename)] })
+            .end(file, () => console.log("end!!"));
     });
     return app;
 }

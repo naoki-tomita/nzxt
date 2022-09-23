@@ -16,7 +16,7 @@ async function getFiles(rootPath: string): Promise<string[]> {
   return [...files, ...(await Promise.all(dirs.map(it => getFiles(it)))).flat()];
 }
 
-async function generateCode(file: string): Promise<string> {
+async function generateCode(file: string): Promise<void> {
   const hash = file.replace(/\//g, "_").replace(/\./g, "_");
   const tmpFilePath = `./.tmp/main.${hash}.tsx`;
   await writeFile(tmpFilePath, `
@@ -27,7 +27,6 @@ async function generateCode(file: string): Promise<string> {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
-  return buildCode(file);
 }
 
 async function buildCode(file: string): Promise<string> {
@@ -168,7 +167,10 @@ async function serveCommand() {
   app.get("/images/:filename", async (req, res) => {
     const { filename } = req.params;
     const file = await readFile(join("./public/images", filename));
-    res.status(200).header({ "content-type": ContentTypes[extname(filename) as keyof typeof ContentTypes] }).end(file);
+    res
+      .status(200)
+      .header({ "content-type": ContentTypes[extname(filename) as keyof typeof ContentTypes] })
+      .end(file);
   });
   return app as unknown as {
     close(): void;

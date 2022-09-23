@@ -27,8 +27,14 @@ async function generateCode(file: string): Promise<string> {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
-  console.log(`Building ${file}...`);
+  return buildCode(file);
+}
+
+async function buildCode(file: string): Promise<string> {
+  const hash = file.replace(/\//g, "_").replace(/\./g, "_");
+  const tmpFilePath = `./.tmp/main.${hash}.tsx`;
   const start = Date.now();
+  console.log(`Building ${file}...`);
   const { outputFiles: [{ text: code }], warnings } = await build({
     entryPoints: [tmpFilePath],
     treeShaking: true,
@@ -55,13 +61,8 @@ function toCodeTemplate(code: string): (parameter: { [key: string]: string }) =>
   `;
 }
 
-async function generateCodeAndGetCodeTemplate(file: string) {
-  const code = await generateCode(file);
-  return toCodeTemplate(code);
-}
-
 async function getCodeTemplate(file: string) {
-  const code = await readFile(file).then(it => it.toString("utf-8"));
+  const code = await buildCode(file);
   return toCodeTemplate(code);
 }
 

@@ -46,8 +46,13 @@ async function generateCode(file) {
       render(<Component {...params} />, document.getElementById("nzxt-app"));
     })(parameter);
   `);
-    console.log(`Building ${file}...`);
+    return buildCode(file);
+}
+async function buildCode(file) {
+    const hash = file.replace(/\//g, "_").replace(/\./g, "_");
+    const tmpFilePath = `./.tmp/main.${hash}.tsx`;
     const start = Date.now();
+    console.log(`Building ${file}...`);
     const { outputFiles: [{ text: code }], warnings } = await esbuild_1.build({
         entryPoints: [tmpFilePath],
         treeShaking: true,
@@ -77,7 +82,7 @@ async function generateCodeAndGetCodeTemplate(file) {
     return toCodeTemplate(code);
 }
 async function getCodeTemplate(file) {
-    const code = await promises_1.readFile(file).then(it => it.toString("utf-8"));
+    const code = await buildCode(file);
     return toCodeTemplate(code);
 }
 const _Document = (_, children) => {

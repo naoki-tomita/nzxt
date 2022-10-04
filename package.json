@@ -16,7 +16,7 @@
     "@types/node": "^14.14.37",
     "@types/node-fetch": "^2.5.9",
     "node-fetch": "^2.6.1",
-    "zheleznaya": "^0.1.18"
+    "zheleznaya": "^0.1.19"
   },
   "scripts": {
     "start": "ts-node --project tsconfig.app.json --files index.tsx",

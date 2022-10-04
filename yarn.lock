@@ -298,7 +298,7 @@ yn@3.1.1:
   resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
 
-zheleznaya@^0.1.18:
-  version "0.1.18"
-  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.18.tgz#79c814a0fd0650f3d5111b8b268bba5f1ecec9b2"
-  integrity sha512-0c0Wk6shyAwMaMpxNDXX8oJoRa0tZ87XmVx25wl56pj4leKtRHiXrqjEYZ9x7LTCbA1FINmNU4urhOdxa+pl8w==
+zheleznaya@^0.1.19:
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.1.19.tgz#5f46714f3f2f63a11d41f72f6276d4ca3a17700f"
+  integrity sha512-VYLdqyG/p+6d0A9VgJIkk7kSza2xjJSBtpRKcn9ucF6EaJPJc815MxldHw3IaH9ZHeqXSJABqO8qKmP5iJutCQ==

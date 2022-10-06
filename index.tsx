@@ -117,10 +117,10 @@ async function serveCommand() {
   const root = "pages";
   const files = await getFiles(root);
   const Document = files.some(it => it.startsWith("pages/_document.tsx"))
-    ? (await import(join(process.cwd(), "pages", "_document"))).default
+    ? (await import(join(process.cwd(), "pages", "_document.tsx"))).default
     : _Document;
   const Error = files.some(it => it.startsWith("pages/_error"))
-    ? (await import(join(process.cwd(), "pages", "_error"))).default
+    ? (await import(join(process.cwd(), "pages", "_error.tsx"))).default
     : _Error;
 
   const app = express();

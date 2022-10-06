@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 require("source-map-support").install()
 const tsconfig = require("../tsconfig.app.json");
-require("ts-node").register(tsconfig);
+require("esbuild-register/dist/node").register({ tsconfigRaw: tsconfig, target: "esnext" });
 
 const { command } = require("../index");
 

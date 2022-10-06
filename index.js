@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -26,10 +30,10 @@ const Express_1 = require("summer-framework/dist/Express");
 const path_1 = require("path");
 const zheleznaya_1 = require("zheleznaya");
 async function getFiles(rootPath) {
-    const names = await promises_1.readdir(rootPath);
+    const names = await (0, promises_1.readdir)(rootPath);
     const list = await Promise.all(names.map(async (it) => ({
-        path: path_1.join(rootPath, it),
-        stat: await promises_1.stat(path_1.join(rootPath, it))
+        path: (0, path_1.join)(rootPath, it),
+        stat: await (0, promises_1.stat)((0, path_1.join)(rootPath, it))
     })));
     const files = list.filter(it => it.stat.isFile()).map(it => it.path);
     const dirs = list.filter(it => !it.stat.isFile()).map(it => it.path);
@@ -38,7 +42,7 @@ async function getFiles(rootPath) {
 async function generateCode(file) {
     const hash = file.replace(/\//g, "_").replace(/\./g, "_");
     const tmpFilePath = `./.tmp/main.${hash}.tsx`;
-    await promises_1.writeFile(tmpFilePath, `
+    await (0, promises_1.writeFile)(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
     import Component from "../${file.replace(".tsx", "").replace(".jsx", "")}";
@@ -52,7 +56,7 @@ async function buildCode(file) {
     const tmpFilePath = `./.tmp/main.${hash}.tsx`;
     const start = Date.now();
     console.log(`Building ${file}...`);
-    const { outputFiles: [{ text: code }], warnings } = await esbuild_1.build({
+    const { outputFiles: [{ text: code }], warnings } = await (0, esbuild_1.build)({
         entryPoints: [tmpFilePath],
         treeShaking: true,
         write: false,
@@ -81,20 +85,20 @@ async function getCodeTemplate(file) {
     return toCodeTemplate(code);
 }
 const _Document = (_, children) => {
-    return (zheleznaya_1.h("html", { lang: "en" },
-        zheleznaya_1.h("head", null,
-            zheleznaya_1.h("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0" }),
-            zheleznaya_1.h("title", null, "Document")),
-        zheleznaya_1.h("body", null, children)));
+    return ((0, zheleznaya_1.h)("html", { lang: "en" },
+        (0, zheleznaya_1.h)("head", null,
+            (0, zheleznaya_1.h)("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0" }),
+            (0, zheleznaya_1.h)("title", null, "Document")),
+        (0, zheleznaya_1.h)("body", null, children)));
 };
 const _Error = ({ error }) => {
-    return (zheleznaya_1.h("div", null,
-        zheleznaya_1.h("h1", null, "An error occured"),
-        zheleznaya_1.h("code", null, error.stack)));
+    return ((0, zheleznaya_1.h)("div", null,
+        (0, zheleznaya_1.h)("h1", null, "An error occured"),
+        (0, zheleznaya_1.h)("code", null, error.stack)));
 };
 const DocType = "<!DOCTYPE html>";
 async function buildCommand() {
-    await promises_1.mkdir(".tmp", { recursive: true });
+    await (0, promises_1.mkdir)(".tmp", { recursive: true });
     const root = "pages";
     const files = await getFiles(root);
     await Promise.all(files.map(async (file) => {
@@ -117,12 +121,12 @@ async function serveCommand() {
     const root = "pages";
     const files = await getFiles(root);
     const Document = files.some(it => it.startsWith("pages/_document.tsx"))
-        ? (await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_document"))))).default
+        ? (await Promise.resolve().then(() => __importStar(require((0, path_1.join)(process.cwd(), "pages", "_document"))))).default
         : _Document;
     const Error = files.some(it => it.startsWith("pages/_error"))
-        ? (await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), "pages", "_error"))))).default
+        ? (await Promise.resolve().then(() => __importStar(require((0, path_1.join)(process.cwd(), "pages", "_error"))))).default
         : _Error;
-    const app = Express_1.express();
+    const app = (0, Express_1.express)();
     Promise.all(files.map(async (file) => {
         const path = file
             .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
@@ -139,29 +143,29 @@ async function serveCommand() {
         const codeTemplate = await getCodeTemplate(file);
         app.get(path, async (req, res) => {
             try {
-                const { default: Component } = await Promise.resolve().then(() => __importStar(require(path_1.join(process.cwd(), `${file}`))));
+                const { default: Component } = await Promise.resolve().then(() => __importStar(require((0, path_1.join)(process.cwd(), `${file}`))));
                 const initialProps = typeof Component.getInitialPrpos === "function"
                     ? await Component.getInitialPrpos({ params: req.params })
                     : {};
-                const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
-                    zheleznaya_1.h("div", { id: "nzxt-app" },
-                        zheleznaya_1.h(Component, { ...initialProps })),
-                    zheleznaya_1.h("script", null, codeTemplate(initialProps)))).trim();
+                const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
+                    (0, zheleznaya_1.h)("div", { id: "nzxt-app" },
+                        (0, zheleznaya_1.h)(Component, { ...initialProps })),
+                    (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim();
                 res.status(200).body(DocType + html);
             }
             catch (e) {
-                const html = zheleznaya_1.renderToText(zheleznaya_1.h(Document, null,
-                    zheleznaya_1.h(Error, { error: e }))).trim();
+                const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
+                    (0, zheleznaya_1.h)(Error, { error: e }))).trim();
                 res.status(500).body(DocType + html);
             }
         });
     }));
     app.get("/images/:filename", async (req, res) => {
         const { filename } = req.params;
-        const file = await promises_1.readFile(path_1.join("./public/images", filename));
+        const file = await (0, promises_1.readFile)((0, path_1.join)("./public/images", filename));
         res
             .status(200)
-            .header({ "content-type": ContentTypes[path_1.extname(filename)] })
+            .header({ "content-type": ContentTypes[(0, path_1.extname)(filename)] })
             .end(file);
     });
     return app;

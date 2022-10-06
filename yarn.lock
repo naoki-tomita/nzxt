@@ -167,6 +167,11 @@ esbuild-openbsd-64@0.15.9:
   resolved "https://registry.yarnpkg.com/esbuild-openbsd-64/-/esbuild-openbsd-64-0.15.9.tgz#0f9d4c6b6772ae50d491d68ad4cc028300dda7c0"
   integrity sha512-JmS18acQl4iSAjrEha1MfEmUMN4FcnnrtTaJ7Qg0tDCOcgpPPQRLGsZqhes0vmx8VA6IqRyScqXvaL7+Q0Uf3A==
 
+esbuild-register@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/esbuild-register/-/esbuild-register-3.3.3.tgz#5bd80025c80caf77e6484ced5cc77233b1d39688"
+  integrity sha512-eFHOkutgIMJY5gc8LUp/7c+LLlDqzNi9T6AwCZ2WKKl3HmT+5ef3ZRyPPxDOynInML0fgaC50yszPKfPnjC0NQ==
+
 esbuild-sunos-64@0.15.9:
   version "0.15.9"
   resolved "https://registry.yarnpkg.com/esbuild-sunos-64/-/esbuild-sunos-64-0.15.9.tgz#c32b7ce574b08f814de810ce7c1e34b843768126"
@@ -267,10 +272,10 @@ source-map@^0.6.0:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
-summer-framework@^0.2.8:
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/summer-framework/-/summer-framework-0.2.8.tgz#51a98d304458b15989f8f7e5b35c208558ef1c09"
-  integrity sha512-DMJAdCN23IDfZAmCv41HvAfaM3OfgwprOpM/9AqLNLpLCit3IfGnC86ObW9V+X67xLhF1G47oZCIbpLcL4+DDg==
+summer-framework@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/summer-framework/-/summer-framework-0.3.0.tgz#4459c2b42a31b7445d7e5b21f9950f2e63fc8fe3"
+  integrity sha512-2aZ98+6qwacaMjQoIYsl6qDwYgGQofsEhqhBaR24vAJI5ihQIjtT1cZlBMTv0oMcNkh+QhxtFCG+8TIXcIUvnQ==
 
 ts-node@^10.0.0:
   version "10.0.0"
@@ -288,10 +293,10 @@ ts-node@^10.0.0:
     source-map-support "^0.5.17"
     yn "3.1.1"
 
-typescript@^4.3.5:
-  version "4.3.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
-  integrity sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==
+typescript@^4.8.4:
+  version "4.8.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.8.4.tgz#c464abca159669597be5f96b8943500b238e60e6"
+  integrity sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==
 
 yn@3.1.1:
   version "3.1.1"

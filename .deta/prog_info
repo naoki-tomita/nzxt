@@ -1,0 +1,1 @@
+{"id":"6cc3a826-939b-4b54-bde9-b7e9e54bccac","space":30655,"runtime":"nodejs14.x","name":"nzxt","path":"maicxw","project":"c0z86a2s","account":"144798365827","region":"ap-southeast-1","deps":["esbuild@^0.15.9","esbuild-register@^3.3.3","source-map-support@^0.5.21","summer-framework@^0.3.0"],"envs":null,"public":true,"log_level":"off","cron":""}

@@ -113,14 +113,23 @@ async function buildCommand() {
   );
 }
 
+function tryImportOrRequire(path: string): Promise<{ default: Component<any> }> | { default: Component<any> } {
+  try {
+    return import(path);
+  } catch (e) {
+    console.warn("Failed to import", e);
+    return require(path);
+  }
+}
+
 async function serveCommand() {
   const root = "pages";
   const files = await getFiles(root);
   const Document = files.some(it => it.startsWith("pages/_document.tsx"))
-    ? (await import(join(process.cwd(), "pages", "_document.tsx"))).default
+    ? (await tryImportOrRequire(join(process.cwd(), "pages", "_document.tsx"))).default
     : _Document;
-  const Error = files.some(it => it.startsWith("pages/_error"))
-    ? (await import(join(process.cwd(), "pages", "_error.tsx"))).default
+  const Error: Component<{ error: any }> = files.some(it => it.startsWith("pages/_error"))
+    ? (await tryImportOrRequire(join(process.cwd(), "pages", "_error.tsx"))).default
     : _Error;
 
   const app = express();
@@ -138,7 +147,7 @@ async function serveCommand() {
     const codeTemplate = await getCodeTemplate(file);
     app.get(path, async (req, res) => {
       try {
-        const { default: Component }: { default: Component<{}> } = await import(join(process.cwd(), `${file}`));
+        const { default: Component } = await tryImportOrRequire(join(process.cwd(), `${file}`));
         const initialProps = typeof Component.getInitialPrpos === "function"
           ? await Component.getInitialPrpos({ params: req.params })
           : {};

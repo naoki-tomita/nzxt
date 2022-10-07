@@ -117,14 +117,23 @@ async function buildCommand() {
         await generateCode(file);
     }));
 }
+function tryImportOrRequire(path) {
+    try {
+        return Promise.resolve().then(() => __importStar(require(path)));
+    }
+    catch (e) {
+        console.warn("Failed to import", e);
+        return require(path);
+    }
+}
 async function serveCommand() {
     const root = "pages";
     const files = await getFiles(root);
     const Document = files.some(it => it.startsWith("pages/_document.tsx"))
-        ? (await Promise.resolve().then(() => __importStar(require((0, path_1.join)(process.cwd(), "pages", "_document"))))).default
+        ? (await tryImportOrRequire((0, path_1.join)(process.cwd(), "pages", "_document.tsx"))).default
         : _Document;
     const Error = files.some(it => it.startsWith("pages/_error"))
-        ? (await Promise.resolve().then(() => __importStar(require((0, path_1.join)(process.cwd(), "pages", "_error"))))).default
+        ? (await tryImportOrRequire((0, path_1.join)(process.cwd(), "pages", "_error.tsx"))).default
         : _Error;
     const app = (0, Express_1.express)();
     Promise.all(files.map(async (file) => {
@@ -143,7 +152,7 @@ async function serveCommand() {
         const codeTemplate = await getCodeTemplate(file);
         app.get(path, async (req, res) => {
             try {
-                const { default: Component } = await Promise.resolve().then(() => __importStar(require((0, path_1.join)(process.cwd(), `${file}`))));
+                const { default: Component } = await tryImportOrRequire((0, path_1.join)(process.cwd(), `${file}`));
                 const initialProps = typeof Component.getInitialPrpos === "function"
                     ? await Component.getInitialPrpos({ params: req.params })
                     : {};

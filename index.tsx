@@ -122,6 +122,8 @@ function tryImportOrRequire(path: string): Promise<{ default: Component<any> }> 
   }
 }
 
+const ContentTypeHeader = { "content-type": "text/html; charset=utf-8" }
+
 async function serveCommand() {
   const root = "pages";
   const files = await getFiles(root);
@@ -161,14 +163,20 @@ async function serveCommand() {
             </script>
           </Document>
         ).trim();
-        res.status(200).body(DocType + html);
+        res
+          .status(200)
+          .header(ContentTypeHeader)
+          .body(DocType + html);
       } catch (e) {
         const html = renderToText(
           <Document>
             <Error error={e} />
           </Document>
         ).trim();
-        res.status(500).body(DocType + html);
+        res
+          .status(500)
+          .header(ContentTypeHeader)
+          .body(DocType + html);
       }
     });
   }));

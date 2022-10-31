@@ -126,6 +126,7 @@ function tryImportOrRequire(path) {
         return require(path);
     }
 }
+const ContentTypeHeader = { "content-type": "text/html; charset=utf-8" };
 async function serveCommand() {
     const root = "pages";
     const files = await getFiles(root);
@@ -160,12 +161,18 @@ async function serveCommand() {
                     (0, zheleznaya_1.h)("div", { id: "nzxt-app" },
                         (0, zheleznaya_1.h)(Component, { ...initialProps })),
                     (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim();
-                res.status(200).body(DocType + html);
+                res
+                    .status(200)
+                    .header(ContentTypeHeader)
+                    .body(DocType + html);
             }
             catch (e) {
                 const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
                     (0, zheleznaya_1.h)(Error, { error: e }))).trim();
-                res.status(500).body(DocType + html);
+                res
+                    .status(500)
+                    .header(ContentTypeHeader)
+                    .body(DocType + html);
             }
         });
     }));

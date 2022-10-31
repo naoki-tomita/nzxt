@@ -122,7 +122,7 @@ function tryImportOrRequire(path: string): Promise<{ default: Component<any> }> 
   }
 }
 
-const ContentTypeHeader = { "content-type": "text/html; charset=utf-8" }
+const ContentTypeHeader = { "content-type": "text/html" }
 
 async function serveCommand() {
   const root = "pages";

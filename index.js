@@ -119,14 +119,14 @@ async function buildCommand() {
 }
 function tryImportOrRequire(path) {
     try {
-        return Promise.resolve().then(() => __importStar(require(path)));
+        return Promise.resolve(`${path}`).then(s => __importStar(require(s)));
     }
     catch (e) {
         console.warn("Failed to import", e);
         return require(path);
     }
 }
-const ContentTypeHeader = { "content-type": "text/html; charset=utf-8" };
+const ContentTypeHeader = { "content-type": "text/html" };
 async function serveCommand() {
     const root = "pages";
     const files = await getFiles(root);
@@ -182,6 +182,7 @@ async function serveCommand() {
         res
             .status(200)
             .header({ "content-type": ContentTypes[(0, path_1.extname)(filename)] })
+            .header({ "cache-control": "max-age=604800" })
             .end(file);
     });
     return app;

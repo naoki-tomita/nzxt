@@ -187,6 +187,7 @@ async function serveCommand() {
     res
       .status(200)
       .header({ "content-type": ContentTypes[extname(filename) as keyof typeof ContentTypes] })
+      .header({ "cache-control": "max-age=604800" })
       .end(file);
   });
   return app as unknown as {

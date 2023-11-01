@@ -1,8 +1,6 @@
 import { Component, h } from "../../h";
 import { readFile } from "fs/promises";
 
-import fetch from "node-fetch";
-
 const Top: Component<{ star: number; file: string }> = ({ star, file }) => {
   return (
     <div>

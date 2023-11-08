@@ -1,5 +1,6 @@
 import { Component as _Component } from "zheleznaya";
-export { h } from "zheleznaya";
+import { h } from "zheleznaya";
+export { h };
 export interface Component<P = unknown> extends _Component<P> {
     getInitialPrpos?(context: {
         params: {
@@ -7,4 +8,5 @@ export interface Component<P = unknown> extends _Component<P> {
         };
     }): Promise<P> | P;
 }
+export declare const SsrStyle: () => any;
 //# sourceMappingURL=h.d.ts.map

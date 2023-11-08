@@ -1,10 +1,13 @@
 import { Component, h } from "../../h";
 import { readFile } from "fs/promises";
+import { css } from "zstyl";
 
 const Top: Component<{ star: number; file: string }> = ({ star, file }) => {
   return (
     <div>
-      <div>Top: {star}</div>
+      <div class={css`
+        font-size: 20px;
+      `}>Top: {star}</div>
       <pre>{file}</pre>
       <img src="/images/logo.png" />
     </div>

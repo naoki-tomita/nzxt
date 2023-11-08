@@ -3,7 +3,7 @@ import { build } from "esbuild";
 import { express } from "summer-framework/dist/Express";
 import { join, extname } from "path";
 import { renderToText, h } from "zheleznaya";
-import { Component } from "./h";
+import { Component, SsrStyle } from "./h";
 
 async function getFiles(rootPath: string): Promise<string[]> {
   const names = await readdir(rootPath);
@@ -71,6 +71,7 @@ const _Document: Component = (_, children) => {
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Document</title>
+      <SsrStyle />
     </head>
     <body>
       {children}
@@ -156,13 +157,13 @@ async function serveCommand() {
         const html = renderToText(
           <Document>
             <div id="nzxt-app">
-              <Component {...initialProps} />
+            <Component {...initialProps} />
             </div>
             <script>
             {codeTemplate(initialProps)}
             </script>
           </Document>
-        ).trim();
+        ).trim().replace("___SSR_STYLE_REPLACER___", (globalThis as any)?.__ssrRenderedStyle ?? "");
         res
           .status(200)
           .header(ContentTypeHeader)

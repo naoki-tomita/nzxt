@@ -15,7 +15,8 @@
     "@types/node": "^20.8.9",
     "ts-node": "^10.0.0",
     "typescript": "^5.2.2",
-    "zheleznaya": "^0.2.3"
+    "zheleznaya": "^0.2.3",
+    "zstyl": "^0.2.3"
   },
   "scripts": {
     "start": "ts-node --project tsconfig.app.json --files index.tsx",

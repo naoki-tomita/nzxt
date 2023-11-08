@@ -29,6 +29,7 @@ const esbuild_1 = require("esbuild");
 const Express_1 = require("summer-framework/dist/Express");
 const path_1 = require("path");
 const zheleznaya_1 = require("zheleznaya");
+const h_1 = require("./h");
 async function getFiles(rootPath) {
     const names = await (0, promises_1.readdir)(rootPath);
     const list = await Promise.all(names.map(async (it) => ({
@@ -88,7 +89,8 @@ const _Document = (_, children) => {
     return ((0, zheleznaya_1.h)("html", { lang: "en" },
         (0, zheleznaya_1.h)("head", null,
             (0, zheleznaya_1.h)("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0" }),
-            (0, zheleznaya_1.h)("title", null, "Document")),
+            (0, zheleznaya_1.h)("title", null, "Document"),
+            (0, zheleznaya_1.h)(h_1.SsrStyle, null)),
         (0, zheleznaya_1.h)("body", null, children)));
 };
 const _Error = ({ error }) => {
@@ -160,7 +162,7 @@ async function serveCommand() {
                 const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
                     (0, zheleznaya_1.h)("div", { id: "nzxt-app" },
                         (0, zheleznaya_1.h)(Component, { ...initialProps })),
-                    (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim();
+                    (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim().replace("___SSR_STYLE_REPLACER___", globalThis?.__ssrRenderedStyle ?? "");
                 res
                     .status(200)
                     .header(ContentTypeHeader)

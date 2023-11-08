@@ -272,3 +272,8 @@ zheleznaya@^0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/zheleznaya/-/zheleznaya-0.2.3.tgz#a953b9862f45ca1dc3a6e69ba75250a1e3139ee1"
   integrity sha512-Is3bAA5DFxneIfwEErPAipdPWlGzW8cCWRpk+K3Zm0sdzRhK+pAE1GPGhPP+69eIvZN2dwNTtfKTJhanS3mAcA==
+
+zstyl@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/zstyl/-/zstyl-0.2.3.tgz#fe7016e16fd067501722022298e815b10cd09797"
+  integrity sha512-BDt6KS4rmp8ttBqSDPN+buLXYmDP/CYTtpzj9ZX2IiiAAFPb4+VK808DikZOuVN3IqZcAG1mP6TigYUjwvex+g==

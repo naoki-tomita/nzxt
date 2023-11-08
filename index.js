@@ -162,7 +162,7 @@ async function serveCommand() {
                 const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
                     (0, zheleznaya_1.h)("div", { id: "nzxt-app" },
                         (0, zheleznaya_1.h)(Component, { ...initialProps })),
-                    (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim().replaceAll(">___SSR_STYLE_REPLACER___<", "" + (globalThis?.__ssrRenderedStyle ?? "") + "");
+                    (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim().replaceAll(">___SSR_STYLE_REPLACER___<", ">" + (globalThis?.__ssrRenderedStyle ?? "") + "<");
                 res
                     .status(200)
                     .header(ContentTypeHeader)

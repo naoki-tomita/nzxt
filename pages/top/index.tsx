@@ -9,7 +9,9 @@ const Top: Component<{ star: number; file: string }> = ({ star, file }) => {
         font-size: 20px;
       `}>Top: {star}</div>
       <pre>{file}</pre>
-      <img src="/images/logo.png" />
+      <img class={css`
+        width: 100px;
+      `} src="/images/logo.png" />
     </div>
   );
 }

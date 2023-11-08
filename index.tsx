@@ -163,7 +163,7 @@ async function serveCommand() {
             {codeTemplate(initialProps)}
             </script>
           </Document>
-        ).trim().replace("___SSR_STYLE_REPLACER___", (globalThis as any)?.__ssrRenderedStyle ?? "");
+        ).trim().replaceAll(">___SSR_STYLE_REPLACER___<", ">" + ((globalThis as any)?.__ssrRenderedStyle ?? "") + "<");
         res
           .status(200)
           .header(ContentTypeHeader)

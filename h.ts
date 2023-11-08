@@ -9,5 +9,5 @@ export interface Component<P = unknown> extends _Component<P> {
   ): Promise<P> | P;
 }
 export const SsrStyle = () => {
-  return h("style", { "data-zstyl": "" }, `___SSR_STYLE_REPLACER___`) as any;
+  return h("style", { "data-zstyl": "" }, "___SSR_STYLE_REPLACER___") as any;
 }

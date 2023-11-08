@@ -7,6 +7,9 @@ const Top: Component<{ star: number; file: string }> = ({ star, file }) => {
     <div>
       <div class={css`
         font-size: 20px;
+        @media (max-width: 600px) {
+          color: red;
+        }
       `}>Top: {star}</div>
       <pre>{file}</pre>
       <img class={css`

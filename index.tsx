@@ -219,6 +219,19 @@ function getSimiralityFilePath(filePaths: UserCreatedTSXFilePath[], path: UrlPat
   return;
 }
 
+function getParameterFromPath(filePath: UserCreatedTSXFilePath, path: UrlPath): Props {
+  const urlPath = convertFilePathToUrlPath(filePath);
+  const splittedPath = path.split("/");
+  const splittedUrlPath = urlPath.split("/");
+  const parameter = splittedUrlPath.reduce((acc, it, i) => {
+    if (it.startsWith(":")) {
+      acc[it.slice(1)] = splittedPath[i];
+    }
+    return acc;
+  }, {} as Props);
+  return parameter;
+}
+
 export async function generate(_url: string) {
   await generateTemporaryCode();
   const url = new URL(_url);
@@ -234,7 +247,8 @@ export async function generate(_url: string) {
 
   const mostSimilarFile = getSimiralityFilePath(files, path);
   const codeTemplate = await getCodeTemplate(mostSimilarFile!);
-  const [_, html] = await generateHtml(mostSimilarFile!, {}, Document, Error, codeTemplate);
+  const props = getParameterFromPath(mostSimilarFile!, path);
+  const [_, html] = await generateHtml(mostSimilarFile!, props, Document, Error, codeTemplate);
   return DocType + html;
 }
 

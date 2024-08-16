@@ -23,12 +23,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.create = exports.command = void 0;
+exports.start = start;
+exports.generate = generate;
 const promises_1 = require("fs/promises");
 const esbuild_1 = require("esbuild");
 const Express_1 = require("summer-framework/dist/Express");
 const path_1 = require("path");
 const zheleznaya_1 = require("zheleznaya");
+const DefaultComponents_1 = require("./DefaultComponents");
+const RootDirName = "pages";
+const ContentTypeHeader = { "content-type": "text/html" };
 async function getFiles(rootPath) {
     const names = await (0, promises_1.readdir)(rootPath);
     const list = await Promise.all(names.map(async (it) => ({
@@ -40,8 +44,7 @@ async function getFiles(rootPath) {
     return [...files, ...(await Promise.all(dirs.map(it => getFiles(it)))).flat()];
 }
 async function generateCode(file) {
-    const hash = file.replace(/\//g, "_").replace(/\./g, "_");
-    const tmpFilePath = `./.tmp/main.${hash}.tsx`;
+    const tmpFilePath = createTmpFilePath(file);
     await (0, promises_1.writeFile)(tmpFilePath, `
     declare const parameter;
     import { render, h } from "zheleznaya";
@@ -51,9 +54,12 @@ async function generateCode(file) {
     })(parameter);
   `);
 }
-async function buildCode(file) {
-    const hash = file.replace(/\//g, "_").replace(/\./g, "_");
-    const tmpFilePath = `./.tmp/main.${hash}.tsx`;
+function createTmpFilePath(filePath) {
+    const hash = filePath.replace(/\//g, "_").replace(/\./g, "_");
+    return `./.tmp/main.${hash}.tsx`;
+}
+async function buildJavaScript(file) {
+    const tmpFilePath = createTmpFilePath(file);
     const start = Date.now();
     console.log(`Building ${file}...`);
     const { outputFiles: [{ text: code }], warnings } = await (0, esbuild_1.build)({
@@ -69,7 +75,7 @@ async function buildCode(file) {
     console.log(`Built ${file} by ${Date.now() - start}ms`);
     return code;
 }
-function toCodeTemplate(code) {
+function createCodeTemplate(code) {
     return parameter => `
     var parameter = ${JSON.stringify(parameter)};
     function require(moduleName) {
@@ -81,43 +87,40 @@ function toCodeTemplate(code) {
   `;
 }
 async function getCodeTemplate(file) {
-    const code = await buildCode(file);
-    return toCodeTemplate(code);
+    const code = await buildJavaScript(file);
+    return createCodeTemplate(code);
 }
-const _Document = (_, children) => {
-    return ((0, zheleznaya_1.h)("html", { lang: "en" },
-        (0, zheleznaya_1.h)("head", null,
-            (0, zheleznaya_1.h)("meta", { name: "viewport", content: "width=device-width, initial-scale=1.0" }),
-            (0, zheleznaya_1.h)("title", null, "Document")),
-        (0, zheleznaya_1.h)("body", null, children)));
-};
-const _Error = ({ error }) => {
-    return ((0, zheleznaya_1.h)("div", null,
-        (0, zheleznaya_1.h)("h1", null, "An error occured"),
-        (0, zheleznaya_1.h)("code", null, error.stack)));
-};
+function isErrorComponentTSX(filePath) {
+    return filePath.includes("_error");
+}
+function isDocumentComponentTSX(filePath) {
+    return filePath.includes("_document");
+}
+function isAppComponentTSX(filePath) {
+    return filePath.includes("_app");
+}
+function isSpecialComponentTSX(filePath) {
+    return isErrorComponentTSX(filePath) || isDocumentComponentTSX(filePath) || isAppComponentTSX(filePath);
+}
 const DocType = "<!DOCTYPE html>";
-async function buildCommand() {
+async function generateTemporaryCode() {
     await (0, promises_1.mkdir)(".tmp", { recursive: true });
-    const root = "pages";
-    const files = await getFiles(root);
+    const files = await getFiles(RootDirName);
     await Promise.all(files.map(async (file) => {
-        const path = file
-            .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
-            .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
-            .replace(/\/(.*)\.tsx$/g, "/$1") // pages/xxx/foo.tsx => pages/xxx/foo
-            .replace(root, "") // pages/xxx/foo => /xxx replace only 1 time.
-            .replace(/\/index$/g, ""); // /xxx/index => /xxx
-        if (path.includes("_error"))
+        if (isSpecialComponentTSX(file))
             return;
-        if (path.includes("_document"))
-            return;
-        if (path.includes("_app"))
-            return; // TODO: _app.
         await generateCode(file);
     }));
 }
-function tryImportOrRequire(path) {
+function convertFilePathToUrlPath(filePath) {
+    return filePath
+        .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
+        .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
+        .replace(/\/(.*)\.tsx$/g, "/$1") // pages/xxx/foo.tsx => pages/xxx/foo
+        .replace(RootDirName, "") // pages/xxx/foo => /xxx replace only 1 time.
+        .replace(/\/index$/g, ""); // /xxx/index => /xxx
+}
+function tryImportOrRequireForPageComponent(path) {
     try {
         return Promise.resolve(`${path}`).then(s => __importStar(require(s)));
     }
@@ -126,54 +129,44 @@ function tryImportOrRequire(path) {
         return require(path);
     }
 }
-const ContentTypeHeader = { "content-type": "text/html" };
-async function serveCommand() {
-    const root = "pages";
-    const files = await getFiles(root);
+async function generateHtml(filePath, params, Document, Error, codeTemplate) {
+    try {
+        const { default: Component } = await tryImportOrRequireForPageComponent((0, path_1.join)(process.cwd(), filePath));
+        const initialProps = typeof Component.getInitialPrpos === "function"
+            ? await Component.getInitialPrpos({ params })
+            : {};
+        const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
+            (0, zheleznaya_1.h)("div", { id: "nzxt-app" },
+                (0, zheleznaya_1.h)(Component, { ...initialProps })),
+            (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim();
+        return [200, html];
+    }
+    catch (e) {
+        const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
+            (0, zheleznaya_1.h)(Error, { error: e }))).trim();
+        return [500, html];
+    }
+}
+async function createServer() {
+    const files = await getFiles(RootDirName);
     const Document = files.some(it => it.startsWith("pages/_document.tsx"))
-        ? (await tryImportOrRequire((0, path_1.join)(process.cwd(), "pages", "_document.tsx"))).default
-        : _Document;
+        ? (await tryImportOrRequireForPageComponent((0, path_1.join)(process.cwd(), "pages", "_document.tsx"))).default
+        : DefaultComponents_1.Document;
     const Error = files.some(it => it.startsWith("pages/_error"))
-        ? (await tryImportOrRequire((0, path_1.join)(process.cwd(), "pages", "_error.tsx"))).default
-        : _Error;
+        ? (await tryImportOrRequireForPageComponent((0, path_1.join)(process.cwd(), "pages", "_error.tsx"))).default
+        : DefaultComponents_1.Error;
     const app = (0, Express_1.express)();
     Promise.all(files.map(async (file) => {
-        const path = file
-            .replace(/\/_(.+)_\//g, "/:$1/") // pages/_id_/foo.tsx => pages/:id/foo.tsx
-            .replace(/\/_(.+)_\./g, "/:$1.") // pages/xxx/_id_.tsx => pages/xxx/:id.tsx
-            .replace(/\/(.*)\.tsx$/g, "/$1") // pages/xxx/foo.tsx => pages/xxx/foo
-            .replace(root, "") // pages/xxx/foo => /xxx replace only 1 time.
-            .replace(/\/index$/g, ""); // /xxx/index => /xxx
-        if (path.includes("_error"))
+        if (isSpecialComponentTSX(file))
             return;
-        if (path.includes("_document"))
-            return;
-        if (path.includes("_app"))
-            return; // TODO: _app.
+        const path = convertFilePathToUrlPath(file);
         const codeTemplate = await getCodeTemplate(file);
         app.get(path, async (req, res) => {
-            try {
-                const { default: Component } = await tryImportOrRequire((0, path_1.join)(process.cwd(), `${file}`));
-                const initialProps = typeof Component.getInitialPrpos === "function"
-                    ? await Component.getInitialPrpos({ params: req.params })
-                    : {};
-                const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
-                    (0, zheleznaya_1.h)("div", { id: "nzxt-app" },
-                        (0, zheleznaya_1.h)(Component, { ...initialProps })),
-                    (0, zheleznaya_1.h)("script", null, codeTemplate(initialProps)))).trim();
-                res
-                    .status(200)
-                    .header(ContentTypeHeader)
-                    .body(DocType + html);
-            }
-            catch (e) {
-                const html = (0, zheleznaya_1.renderToText)((0, zheleznaya_1.h)(Document, null,
-                    (0, zheleznaya_1.h)(Error, { error: e }))).trim();
-                res
-                    .status(500)
-                    .header(ContentTypeHeader)
-                    .body(DocType + html);
-            }
+            const [status, html] = await generateHtml(file, req.params, Document, Error, codeTemplate);
+            res
+                .status(status)
+                .header(ContentTypeHeader)
+                .end(DocType + html);
         });
     }));
     app.get("/images/:filename", async (req, res) => {
@@ -187,24 +180,38 @@ async function serveCommand() {
     });
     return app;
 }
-async function command(command) {
-    command = command ?? process.argv[2] ?? "start";
-    if (command === "build") {
-        await buildCommand();
-    }
-    else if (command === "start") {
-        await buildCommand();
-        return serveCommand();
-    }
-    else if (command === "serve") {
-        return serveCommand();
-    }
+async function start() {
+    await generateTemporaryCode();
+    return createServer();
 }
-exports.command = command;
-async function create() {
-    return serveCommand();
+function getSimiralityFilePath(filePaths, path) {
+    const splittedPath = path.split("/");
+    for (const current of filePaths) {
+        const urlPath = convertFilePathToUrlPath(current);
+        const splittedUrlPath = urlPath.split("/");
+        if (splittedPath.length !== splittedUrlPath.length)
+            continue;
+        if (splittedUrlPath.every((it, i) => (it.startsWith(":") || it === splittedPath[i]))) {
+            return current;
+        }
+    }
+    return;
 }
-exports.create = create;
+async function generate(_url) {
+    const url = new URL(_url);
+    const files = await getFiles(RootDirName);
+    const Document = files.some(it => it.startsWith("pages/_document.tsx"))
+        ? (await tryImportOrRequireForPageComponent((0, path_1.join)(process.cwd(), "pages", "_document.tsx"))).default
+        : DefaultComponents_1.Document;
+    const Error = files.some(it => it.startsWith("pages/_error"))
+        ? (await tryImportOrRequireForPageComponent((0, path_1.join)(process.cwd(), "pages", "_error.tsx"))).default
+        : DefaultComponents_1.Error;
+    const path = url.pathname;
+    const mostSimilarFile = getSimiralityFilePath(files, path);
+    const codeTemplate = await getCodeTemplate(mostSimilarFile);
+    const [status, html] = await generateHtml(mostSimilarFile, {}, Document, Error, codeTemplate);
+    return html;
+}
 const ContentTypes = {
     ".png": "image/png",
     ".jpg": "image/jpeg",

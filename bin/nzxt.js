@@ -3,12 +3,17 @@ require("source-map-support").install()
 const tsconfig = require("../tsconfig.app.json");
 require("esbuild-register/dist/node").register({ tsconfigRaw: tsconfig, target: "esnext" });
 
-const { command } = require("../index");
+const { start } = require("../dst/index");
 
-command()
-  .then(app => {
-    if (["start", "serve", undefined].includes(process.argv[2])) {
-      app.listen(parseInt(process.env.PORT || "8080", 10))
-    }
-  })
-  .catch(e => console.error(e));
+const command = process.argv[2];
+if (command === "start" || command == null) {
+  start()
+    .then(app => {
+      if (app) {
+        app.listen(parseInt(process.env.PORT || "8080", 10))
+      }
+    })
+    .catch(e => console.error(e));
+} else if (command === "generate") {
+
+}

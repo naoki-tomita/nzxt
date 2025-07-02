@@ -3,7 +3,8 @@ import { build } from "esbuild";
 import { express } from "summer-framework/dist/Express";
 import { join, extname } from "path";
 import { renderToText, h } from "zheleznaya";
-import { Component, SsrStyle } from "./h";
+import { Component } from "./h";
+import { Document as _Document, Error as _Error } from "./DefaultComponents";
 
 async function getFiles(rootPath: string): Promise<string[]> {
   const names = await readdir(rootPath);
@@ -63,30 +64,6 @@ function toCodeTemplate(code: string): (parameter: { [key: string]: string }) =>
 async function getCodeTemplate(file: string) {
   const code = await buildCode(file);
   return toCodeTemplate(code);
-}
-
-const _Document: Component = (_, children) => {
-  return (
-    <html lang="en">
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Document</title>
-      <SsrStyle />
-    </head>
-    <body>
-      {children}
-    </body>
-    </html>
-  );
-}
-
-const _Error: Component<{ error: Error }> = ({ error }) => {
-  return (
-    <div>
-      <h1>An error occured</h1>
-      <code>{error.stack}</code>
-    </div>
-  );
 }
 
 const DocType = "<!DOCTYPE html>"

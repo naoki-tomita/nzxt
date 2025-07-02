@@ -21,7 +21,7 @@
     "zheleznaya": "^0.2.4"
   },
   "scripts": {
-    "start": "ts-node --project tsconfig.app.json --files index.tsx",
+    "start": "ts-node --project tsconfig.app.json --files bin/nzxt.js",
     "build": "tsc --project tsconfig.json",
     "prepublish": "yarn build"
   },

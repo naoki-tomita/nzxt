@@ -220,9 +220,9 @@ function getSimiralityFilePath(filePaths: UserCreatedTSXFilePath[], path: UrlPat
   return;
 }
 
-export async function generate(_url: string) {
+export async function generate(rawUrl: string) {
   await generateTemporaryCode();
-  const url = new URL(_url);
+  const url = new URL(rawUrl);
   const files = await getFiles(RootDirName);
   const Document = files.some(it => it.startsWith("pages/_document.tsx"))
     ? (await tryImportOrRequireForPageComponent(join(process.cwd(), "pages", "_document.tsx") as UserCreatedTSXFilePath)).default

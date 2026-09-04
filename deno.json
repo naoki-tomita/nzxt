@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "h"
+  },
+  "unstable": ["detect-cjs"],
+  "nodeModulesDir": "manual",
+  "tasks": {
+    "start": "deno run --allow-all bin/nzxt.js"
+  }
+}

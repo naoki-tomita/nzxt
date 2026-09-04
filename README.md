@@ -6,32 +6,32 @@ See [documentation](https://217.142.230.147/)
 
 ## Runtimes
 
-nzxt runs on both Node.js and Deno. Dependencies are installed with npm/yarn in
-either case, Deno reads the same `node_modules`.
+nzxt runs on both Node.js and Deno.
 
 ```sh
-yarn install
-
 # Node.js
+yarn install
 node bin/nzxt.js
 
-# Deno
+# Deno (no npm/yarn needed, Deno installs the dependencies itself)
 deno task start
 ```
 
+Both runtimes read the same `package.json` and the same `node_modules`, so
+either installer works for either runtime.
+
 A Deno project using nzxt needs a `deno.json` telling Deno how to compile the
-JSX in `pages/`, and `node_modules` installed by npm/yarn:
+JSX in `pages/`:
 
 ```json
 {
   "compilerOptions": {
     "jsx": "react",
     "jsxFactory": "h"
-  },
-  "nodeModulesDir": "manual"
+  }
 }
 ```
 
 This repository's own `deno.json` additionally enables `"unstable": ["detect-cjs"]`,
-which is only needed because `bin/nzxt.js` and `dst/` are CommonJS files living
-outside `node_modules`.
+which is only needed here because `bin/nzxt.js` and `dst/` are CommonJS files
+living outside `node_modules`.

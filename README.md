@@ -8,6 +8,9 @@ See [documentation]([https://217.142.230.147/](https://nzxt-docs.naoki-tomita.de
 
 nzxt runs on both Node.js and Deno.
 
+nzxt uses zheleznaya 0.3, which is an ES module only package, so Node.js
+20.19+ / 22.12+ (or Deno 2) is required.
+
 ```sh
 # Node.js
 yarn install
@@ -29,6 +32,18 @@ JSX in `pages/`:
     "jsx": "react",
     "jsxFactory": "h"
   }
+}
+```
+
+Pages that need state use `useStore` from `nzxt/h` (zheleznaya 0.3 no longer
+provides a global `useStore`):
+
+```tsx
+import { Component, h, useStore } from "nzxt/h";
+
+const Counter: Component<{ count: number }> = ({ count }) => {
+  const state = useStore({ count });
+  return <button onclick={() => state.count++}>{state.count}</button>;
 }
 ```
 

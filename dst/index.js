@@ -15,15 +15,27 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.start = start;
+exports.buildCommand = buildCommand;
+exports.serveCommand = serveCommand;
 exports.generate = generate;
 const promises_1 = require("fs/promises");
 const esbuild_1 = require("esbuild");
@@ -47,10 +59,11 @@ async function generateCode(file) {
     const tmpFilePath = createTmpFilePath(file);
     await (0, promises_1.writeFile)(tmpFilePath, `
     declare const parameter;
-    import { render, h } from "zheleznaya";
+    import { createRoot, h } from "zheleznaya";
     import Component from "../${file.replace(".tsx", "").replace(".jsx", "")}";
     (function (params: any) {
-      render(<Component {...params} />, document.getElementById("nzxt-app"));
+      const root = (globalThis as any).__nzxtRoot__ = createRoot(document.getElementById("nzxt-app"));
+      root.render(<Component {...params} />);
     })(parameter);
   `);
 }
@@ -183,6 +196,12 @@ async function createServer() {
 }
 async function start() {
     await generateTemporaryCode();
+    return createServer();
+}
+async function buildCommand() {
+    await generateTemporaryCode();
+}
+async function serveCommand() {
     return createServer();
 }
 function getSimiralityFilePath(filePaths, path) {

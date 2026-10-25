@@ -34,10 +34,11 @@ async function generateCode(file: UserCreatedTSXFilePath): Promise<void> {
   const tmpFilePath = createTmpFilePath(file);
   await writeFile(tmpFilePath, `
     declare const parameter;
-    import { render, h } from "zheleznaya";
+    import { createRoot, h } from "zheleznaya";
     import Component from "../${file.replace(".tsx", "").replace(".jsx", "")}";
     (function (params: any) {
-      render(<Component {...params} />, document.getElementById("nzxt-app"));
+      const root = (globalThis as any).__nzxtRoot__ = createRoot(document.getElementById("nzxt-app"));
+      root.render(<Component {...params} />);
     })(parameter);
   `);
 }
@@ -204,6 +205,14 @@ async function createServer() {
 
 export async function start() {
   await generateTemporaryCode();
+  return createServer();
+}
+
+export async function buildCommand() {
+  await generateTemporaryCode();
+}
+
+export async function serveCommand() {
   return createServer();
 }
 

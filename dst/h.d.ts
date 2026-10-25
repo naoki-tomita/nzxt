@@ -1,7 +1,8 @@
-import { Component as _Component } from "zheleznaya";
 import { h } from "zheleznaya";
 export { h };
-export interface Component<P = unknown> extends _Component<P> {
+type Children = Parameters<typeof h> extends [any, any, ...infer C] ? C : never;
+export interface Component<P = unknown> {
+    (props: P, children: Children): ReturnType<typeof h>;
     getInitialPrpos?(context: {
         params: {
             [keys: string]: string;
@@ -9,4 +10,5 @@ export interface Component<P = unknown> extends _Component<P> {
     }): Promise<P> | P;
 }
 export declare const SsrStyle: () => any;
+export declare function useStore<T extends {}>(initialValue: T): T;
 //# sourceMappingURL=h.d.ts.map
